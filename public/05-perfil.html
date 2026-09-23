@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundManager — Mi Perfil</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:   #1A1A2E;
+      --bg-panel:  #16213E;
+      --bg-input:  #0F3460;
+      --accent:    #E94560;
+      --text-main: #EAEAEA;
+      --text-sub:  #A0A0B4;
+      --success:   #50DC78;
+      --danger:    #FF5050;
+      --yellow:    #FFC850;
+      --sidebar-w: 220px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-base); color: var(--text-main); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    .sm-topbar {
+      background: var(--bg-panel); height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem; border-bottom: 1px solid rgba(233,69,96,.2);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .sm-brand { color: var(--accent); font-weight: 700; font-size: 1.05rem; text-decoration: none; display: flex; align-items: center; gap: .4rem; }
+    .sm-user-chip { background: var(--bg-input); border: 1px solid var(--text-sub); border-radius: 20px; padding: .3rem .7rem; font-size: .8rem; display: flex; align-items: center; gap: .4rem; cursor: pointer; text-decoration: none; color: var(--text-main); }
+    .sm-avatar-sm { width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; color: #fff; }
+    .sm-layout { display: flex; flex: 1; }
+    /* Sidebar */
+    .sm-sidebar { width: var(--sidebar-w); background: var(--bg-panel); border-right: 1px solid rgba(255,255,255,.05); display: flex; flex-direction: column; padding: 1rem 0; min-height: calc(100vh - 52px); }
+    .sm-sidebar-section { font-size: .68rem; font-weight: 700; color: var(--text-sub); letter-spacing: .1em; padding: .4rem 1rem; margin-top: .5rem; }
+    .sm-nav-item { display: flex; align-items: center; gap: .65rem; padding: .65rem 1rem; font-size: .88rem; color: var(--text-sub); text-decoration: none; transition: background .15s, color .15s; position: relative; }
+    .sm-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-main); text-decoration: none; }
+    .sm-nav-item.active { background: rgba(15,52,96,.8); color: var(--text-main); font-weight: 600; }
+    .sm-nav-item.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent); border-radius:0 2px 2px 0; }
+    .sm-nav-item i { font-size: 1.05rem; width: 20px; text-align: center; }
+    .sm-sidebar-bottom { margin-top: auto; border-top: 1px solid rgba(255,255,255,.07); padding-top: .5rem; }
+    /* Contenido */
+    .sm-content { flex: 1; padding: 1.5rem; overflow-y: auto; }
+    .sm-page-header { margin-bottom: 1.4rem; }
+    .sm-page-title  { font-size: 1.2rem; font-weight: 700; margin-bottom: .2rem; }
+    .sm-page-sub    { font-size: .8rem; color: var(--text-sub); }
+    /* Hero perfil */
+    .sm-profile-hero {
+      background: var(--bg-panel); border-radius: 14px; padding: 1.5rem;
+      margin-bottom: 1.2rem; display: flex; align-items: center; gap: 1.5rem;
+      border: 1px solid rgba(255,255,255,.07); flex-wrap: wrap;
+    }
+    .sm-avatar-lg {
+      width: 80px; height: 80px; background: var(--bg-input);
+      border: 2.5px solid var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; font-weight: 800; color: var(--accent);
+      flex-shrink: 0; cursor: pointer; position: relative;
+    }
+    .sm-avatar-lg:hover::after {
+      content: '✎'; position: absolute; inset: 0; background: rgba(233,69,96,.6);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; color: #fff;
+    }
+    .sm-profile-info h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: .4rem; }
+    .sm-profile-meta { display: flex; flex-direction: column; gap: .25rem; font-size: .82rem; color: var(--text-sub); }
+    .sm-profile-meta span { display: flex; align-items: center; gap: .4rem; }
+    .sm-role-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(80,220,120,.12); border: 1px solid rgba(80,220,120,.3);
+      color: var(--success); font-size: .75rem; padding: .2rem .6rem; border-radius: 12px;
+    }
+    /* Pestañas */
+    .sm-tabs { display: flex; gap: .25rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .sm-tab {
+      padding: .55rem 1rem; font-size: .85rem; color: var(--text-sub);
+      cursor: pointer; border: none; background: none;
+      border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+    }
+    .sm-tab:hover { color: var(--text-main); }
+    .sm-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+    .sm-tab-panel { display: none; }
+    .sm-tab-panel.active { display: block; }
+    /* Sección */
+    .sm-section { background: var(--bg-panel); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.2rem; border: 1px solid rgba(255,255,255,.05); }
+    .sm-section-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; margin-bottom: 1rem; }
+    /* Campos */
+    .sm-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width:600px) { .sm-fields-grid { grid-template-columns: 1fr; } }
+    .sm-full-col { grid-column: 1 / -1; }
+    .sm-field { margin-bottom: .9rem; }
+    .sm-label { font-size: .78rem; color: var(--text-sub); margin-bottom: .25rem; display: block; }
+    .sm-input {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--text-sub);
+      border-radius: 8px; color: var(--text-main); padding: .6rem .9rem;
+      font-size: .88rem; outline: none; transition: border-color .2s;
+    }
+    .sm-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,69,96,.12); }
+    .sm-input::placeholder { color: var(--text-sub); }
+    .sm-input:disabled { opacity: .5; cursor: not-allowed; }
+    .sm-input-group { position: relative; }
+    .sm-input-icon { position: absolute; right: .75rem; top: 50%; transform: translateY(-50%); color: var(--text-sub); font-size: 1rem; cursor: pointer; }
+    .sm-input-icon:hover { color: var(--accent); }
+    .sm-input-group .sm-input { padding-right: 2.5rem; }
+    /* Toast guardado */
+    .sm-save-toast {
+      display: none; position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 300;
+      background: rgba(80,220,120,.15); border: 1px solid var(--success);
+      border-radius: 10px; padding: .7rem 1.1rem; font-size: .86rem;
+      color: var(--success); align-items: center; gap: .5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    }
+    .sm-save-toast.show { display: flex; }
+    /* Botones */
+    .sm-btn-row { display: flex; gap: .75rem; margin-top: .75rem; flex-wrap: wrap; }
+    .sm-btn-primary {
+      background: var(--accent); color: #fff; border: none; border-radius: 10px;
+      padding: .6rem 1.1rem; font-size: .88rem; font-weight: 700; cursor: pointer;
+      transition: background .2s; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .sm-btn-primary:hover { background: #c73450; }
+    .sm-btn-ghost {
+      background: transparent; color: var(--text-sub); border: 1px solid var(--text-sub);
+      border-radius: 10px; padding: .6rem 1.1rem; font-size: .88rem; font-weight: 600;
+      cursor: pointer; transition: border-color .2s, color .2s;
+      display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .sm-btn-ghost:hover { border-color: var(--text-main); color: var(--text-main); }
+    .sm-btn-danger-ghost {
+      background: transparent; color: var(--danger); border: 1px solid var(--danger);
+      border-radius: 10px; padding: .6rem 1.1rem; font-size: .88rem; font-weight: 600;
+      cursor: pointer; transition: background .2s;
+      display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .sm-btn-danger-ghost:hover { background: rgba(255,80,80,.1); }
+    /* Estadísticas mini */
+    .sm-mini-stats { display: flex; gap: .75rem; flex-wrap: wrap; margin-left: auto; }
+    .sm-mini-stat { text-align: center; }
+    .sm-mini-val  { font-size: 1.3rem; font-weight: 800; line-height: 1; }
+    .sm-mini-lbl  { font-size: .7rem; color: var(--text-sub); }
+    .sm-page-footer { text-align: center; padding: 1rem; font-size: .75rem; color: var(--text-sub); border-top: 1px solid rgba(255,255,255,.05); }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="sm-topbar" role="banner">
+    <a href="04-dashboard.html" class="sm-brand">
+      <i class="bi bi-music-note-beamed"></i> SoundManager
+    </a>
+    <a href="05-perfil.html" class="sm-user-chip" aria-label="Mi perfil">
+      <div class="sm-avatar-sm" id="avatarInitial">?</div>
+      <span id="topbarNombre">Mi Perfil</span>
+    </a>
+  </header>
+
+  <div class="sm-layout">
+    <!-- Sidebar -->
+    <aside class="sm-sidebar" role="navigation" aria-label="Menú principal">
+      <div class="sm-sidebar-section">PRINCIPAL</div>
+      <a href="04-dashboard.html" class="sm-nav-item"><i class="bi bi-grid-fill"></i> Dashboard</a>
+      <a href="04-dashboard.html" class="sm-nav-item"><i class="bi bi-music-note-list"></i> Mis Canciones</a>
+      <a href="04-dashboard.html" class="sm-nav-item"><i class="bi bi-clock-history"></i> Auditoría</a>
+      <div class="sm-sidebar-section">ADMINISTRACIÓN</div>
+      <a href="04-dashboard.html" class="sm-nav-item"><i class="bi bi-people-fill"></i> Usuarios</a>
+      <div class="sm-sidebar-bottom">
+        <a href="05-perfil.html" class="sm-nav-item active"><i class="bi bi-person-circle"></i> Mi Perfil</a>
+        <button class="sm-nav-item" id="btnLogout" style="background:none;border:none;cursor:pointer;width:100%;text-align:left">
+          <i class="bi bi-box-arrow-right" style="color:var(--danger)"></i>
+          <span style="color:var(--danger)">Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="sm-content" role="main">
+      <div class="sm-page-header">
+        <h1 class="sm-page-title">Mi Perfil</h1>
+        <p class="sm-page-sub">Administra tu información personal y preferencias</p>
+      </div>
+
+      <!-- Hero -->
+      <div class="sm-profile-hero">
+        <div class="sm-avatar-lg" id="avatarLg" aria-label="Avatar del usuario" role="img">JV</div>
+        <div class="sm-profile-info">
+          <h2 id="heroNombre">Jeinner Antony Valencia Ortiz</h2>
+          <div class="sm-profile-meta">
+            <span><i class="bi bi-envelope-fill" aria-hidden="true"></i> <span id="heroEmail">—</span></span>
+            <span><i class="bi bi-calendar-fill" aria-hidden="true"></i> Miembro desde <span id="heroFecha">—</span></span>
+          </div>
+          <div style="margin-top:.5rem">
+            <span class="sm-role-badge"><i class="bi bi-shield-check-fill" aria-hidden="true"></i> Usuario activo</span>
+          </div>
+        </div>
+        <div class="sm-mini-stats">
+          <div class="sm-mini-stat">
+            <div class="sm-mini-val" id="miniCanciones" style="color:var(--accent)">—</div>
+            <div class="sm-mini-lbl">Canciones</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestañas -->
+      <div class="sm-tabs" role="tablist">
+        <button class="sm-tab active" role="tab" aria-selected="true"  onclick="switchTab('info',this)">
+          <i class="bi bi-person-fill me-1"></i> Información
+        </button>
+        <button class="sm-tab" role="tab" aria-selected="false" onclick="switchTab('security',this)">
+          <i class="bi bi-shield-lock me-1"></i> Seguridad
+        </button>
+        <button class="sm-tab" role="tab" aria-selected="false" onclick="switchTab('prefs',this)">
+          <i class="bi bi-sliders me-1"></i> Preferencias
+        </button>
+      </div>
+
+      <!-- Tab 1: Información personal -->
+      <div class="sm-tab-panel active" id="tab-info" role="tabpanel">
+        <div class="sm-section">
+          <h3 class="sm-section-title">
+            <i class="bi bi-person-vcard me-2" style="color:var(--accent)"></i>Datos personales
+          </h3>
+          <form id="profileForm" novalidate>
+            <div class="sm-fields-grid">
+              <div class="sm-field">
+                <label class="sm-label" for="pNombres">Nombres</label>
+                <input type="text" id="pNombres" class="sm-input" value="Jeinner Antony" autocomplete="given-name" aria-required="true" />
+              </div>
+              <div class="sm-field">
+                <label class="sm-label" for="pApellidos">Apellidos</label>
+                <input type="text" id="pApellidos" class="sm-input" value="Valencia Ortiz" autocomplete="family-name" aria-required="true" />
+              </div>
+              <div class="sm-field">
+                <label class="sm-label" for="pCedula">Número de cédula</label>
+                <div class="sm-input-group">
+                  <input type="text" id="pCedula" class="sm-input" value="••••••••••" inputmode="numeric" maxlength="10" disabled aria-describedby="cedulaNote" />
+                  <i class="bi bi-lock-fill sm-input-icon" style="pointer-events:none" aria-hidden="true"></i>
+                </div>
+                <span id="cedulaNote" style="font-size:.72rem;color:var(--text-sub)">La cédula no puede modificarse. Contacta soporte.</span>
+              </div>
+              <div class="sm-field">
+                <label class="sm-label" for="pFecha">Fecha de nacimiento</label>
+                <input type="date" id="pFecha" class="sm-input" value="1994-06-15" aria-required="true" />
+              </div>
+              <div class="sm-field sm-full-col">
+                <label class="sm-label" for="pEmail">Correo electrónico</label>
+                <div class="sm-input-group">
+                  <input type="email" id="pEmail" class="sm-input" value="anthonyvalenciaortiz@gmail.com" autocomplete="email" aria-required="true" />
+                  <i class="bi bi-envelope sm-input-icon" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+            <div class="sm-btn-row">
+              <button type="submit" class="sm-btn-primary">
+                <i class="bi bi-floppy-fill"></i> Guardar cambios
+              </button>
+              <button type="button" class="sm-btn-ghost" onclick="resetForm()">
+                <i class="bi bi-arrow-counterclockwise"></i> Descartar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tab 2: Seguridad -->
+      <div class="sm-tab-panel" id="tab-security" role="tabpanel">
+        <div class="sm-section">
+          <h3 class="sm-section-title">
+            <i class="bi bi-shield-lock me-2" style="color:var(--accent)"></i>Cambiar contraseña
+          </h3>
+          <form id="passForm" novalidate>
+            <div class="sm-fields-grid">
+              <div class="sm-field sm-full-col">
+                <label class="sm-label" for="passActual">Contraseña actual</label>
+                <div class="sm-input-group">
+                  <input type="password" id="passActual" class="sm-input" placeholder="••••••••••••" autocomplete="current-password" />
+                  <i class="bi bi-eye sm-input-icon" id="togPassActual" role="button" tabindex="0" aria-label="Mostrar contraseña actual"></i>
+                </div>
+              </div>
+              <div class="sm-field">
+                <label class="sm-label" for="passNew">Nueva contraseña</label>
+                <div class="sm-input-group">
+                  <input type="password" id="passNew" class="sm-input" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                  <i class="bi bi-eye sm-input-icon" id="togPassNew" role="button" tabindex="0" aria-label="Mostrar nueva contraseña"></i>
+                </div>
+                <div style="font-size:.72rem;color:var(--text-sub);margin-top:.2rem">Usa al menos 8 caracteres con letras y números</div>
+              </div>
+              <div class="sm-field">
+                <label class="sm-label" for="passNewConf">Confirmar nueva contraseña</label>
+                <div class="sm-input-group">
+                  <input type="password" id="passNewConf" class="sm-input" placeholder="Repite la contraseña" autocomplete="new-password" />
+                  <i class="bi bi-eye sm-input-icon" id="togPassConf" role="button" tabindex="0" aria-label="Mostrar confirmación"></i>
+                </div>
+              </div>
+            </div>
+            <div class="sm-btn-row">
+              <button type="submit" class="sm-btn-primary">
+                <i class="bi bi-key-fill"></i> Actualizar contraseña
+              </button>
+              <button type="button" class="sm-btn-danger-ghost" id="btnCerrarSesiones">
+                <i class="bi bi-box-arrow-right"></i> Cerrar todas las sesiones
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tab 3: Preferencias -->
+      <div class="sm-tab-panel" id="tab-prefs" role="tabpanel">
+        <div class="sm-section">
+          <h3 class="sm-section-title">
+            <i class="bi bi-sliders me-2" style="color:var(--accent)"></i>Preferencias musicales y del sistema
+          </h3>
+          <div class="sm-fields-grid">
+            <div class="sm-field">
+              <label class="sm-label" for="prefGenre">Género favorito</label>
+              <select id="prefGenre" class="sm-input">
+                <option>Rock</option><option>Pop</option><option>Electrónica</option>
+                <option>Latina</option><option>Jazz</option><option>Clásica</option>
+              </select>
+            </div>
+            <div class="sm-field">
+              <label class="sm-label" for="prefLang">Idioma de la interfaz</label>
+              <select id="prefLang" class="sm-input">
+                <option selected>Español (Colombia)</option>
+                <option>English (US)</option>
+              </select>
+            </div>
+            <div class="sm-field sm-full-col">
+              <label class="sm-label">Notificaciones</label>
+              <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem">
+                <label style="font-size:.84rem;color:var(--text-main);display:flex;align-items:center;gap:.5rem;cursor:pointer">
+                  <input type="checkbox" checked style="accent-color:var(--accent)" />
+                  Notificar por correo cuando se inicie sesión desde un dispositivo nuevo
+                </label>
+                <label style="font-size:.84rem;color:var(--text-main);display:flex;align-items:center;gap:.5rem;cursor:pointer">
+                  <input type="checkbox" style="accent-color:var(--accent)" />
+                  Recibir resumen semanal de actividad musical
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="sm-btn-row">
+            <button type="button" class="sm-btn-primary" onclick="showSaveToast()">
+              <i class="bi bi-floppy-fill"></i> Guardar preferencias
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast guardado -->
+  <div class="sm-save-toast" id="saveToast" role="status" aria-live="polite">
+    <i class="bi bi-check-circle-fill"></i> Cambios guardados correctamente
+  </div>
+
+  <footer class="sm-page-footer" role="contentinfo">
+    Sistema de Gestión de Usuarios y Preferencias Musicales &nbsp;|&nbsp;
+    GA5-220501095-AA1-EV04 &nbsp;|&nbsp; Jeinner Antony Valencia Ortiz &nbsp;|&nbsp; Ficha 3336169
+  </footer>
+
+  <script>
+    // ── Guardia de sesión ──
+    const raw = sessionStorage.getItem('sm_usuario');
+    if (!raw) { window.location.href = '01-login.html'; }
+    const usuario = JSON.parse(raw || '{}');
+
+    // Rellenar datos del usuario en el hero
+    const nombreCompleto = usuario.nombre || 'Jeinner Antony Valencia Ortiz';
+    const partes = nombreCompleto.split(' ');
+    const initials = partes.slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    document.getElementById('avatarInitial').textContent = initials;
+    document.getElementById('avatarLg').textContent      = initials;
+    document.getElementById('topbarNombre').textContent  = nombreCompleto;
+    document.getElementById('heroNombre').textContent    = nombreCompleto;
+    document.getElementById('heroEmail').textContent     = usuario.email || '—';
+    document.getElementById('heroFecha').textContent     = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long'});
+
+    // Cargar estadísticas
+    fetch('/api/canciones').then(r=>r.json()).then(data => {
+      document.getElementById('miniCanciones').textContent = Array.isArray(data) ? data.length : 0;
+    }).catch(()=>{});
+
+    // Cambiar pestañas
+    function switchTab(name, btn) {
+      document.querySelectorAll('.sm-tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sm-tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+      document.getElementById('tab-'+name).classList.add('active');
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
+    }
+
+    // Toggle contraseñas
+    ['togPassActual','togPassNew','togPassConf'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const map = { togPassActual:'passActual', togPassNew:'passNew', togPassConf:'passNewConf' };
+      btn.addEventListener('click', () => {
+        const inp = document.getElementById(map[id]);
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.className = show ? 'bi bi-eye-slash sm-input-icon' : 'bi bi-eye sm-input-icon';
+      });
+    });
+
+    function showSaveToast() {
+      const t = document.getElementById('saveToast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // Guardar perfil
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      // En producción → PUT /api/usuarios/:id con los datos actualizados
+      showSaveToast();
+    });
+
+    function resetForm() {
+      const partes = nombreCompleto.split(' ');
+      document.getElementById('pNombres').value   = partes.slice(0,2).join(' ');
+      document.getElementById('pApellidos').value = partes.slice(2).join(' ');
+      document.getElementById('pEmail').value     = usuario.email || '';
+    }
+
+    // Cambiar contraseña
+    document.getElementById('passForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const p1 = document.getElementById('passNew').value;
+      const p2 = document.getElementById('passNewConf').value;
+      if (p1.length < 8) { alert('La nueva contraseña debe tener mínimo 8 caracteres.'); return; }
+      if (p1 !== p2)     { alert('Las contraseñas no coinciden.'); return; }
+      showSaveToast();
+      document.getElementById('passForm').reset();
+    });
+
+    // Cerrar sesión
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      try { await fetch('/api/auth/logout', { method:'POST' }); } catch(_) {}
+      sessionStorage.removeItem('sm_usuario');
+      window.location.href = '01-login.html';
+    });
+
+    document.getElementById('btnCerrarSesiones').addEventListener('click', () => {
+      if (confirm('¿Cerrar todas las sesiones activas?')) {
+        sessionStorage.removeItem('sm_usuario');
+        window.location.href = '01-login.html';
+      }
+    });
+  </script>
+
+</body>
+</html>

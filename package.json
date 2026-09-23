@@ -1,0 +1,22 @@
+{
+  "name": "sistema-musical",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión de Usuarios y Preferencias Musicales",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev":     "nodemon src/server.js",
+    "consola": "node index.js"
+  },
+  "author": "Jeinner Antony Valencia Ortiz",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.x.x",
+    "dotenv": "^16.x.x",
+    "express": "^5.2.1",
+    "mysql2": "^3.x.x"
+  },
+  "devDependencies": {
+    "nodemon": "^3.x.x"
+  }
+}

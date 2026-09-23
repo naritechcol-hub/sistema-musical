@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundManager — Registro de Usuario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:   #1A1A2E;
+      --bg-panel:  #16213E;
+      --bg-input:  #0F3460;
+      --accent:    #E94560;
+      --text-main: #EAEAEA;
+      --text-sub:  #A0A0B4;
+      --success:   #50DC78;
+      --danger:    #FF5050;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .sm-navbar {
+      background: var(--bg-panel);
+      padding: .75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(233,69,96,.25);
+    }
+    .sm-brand {
+      color: var(--accent); font-weight: 700; font-size: 1.1rem;
+      text-decoration: none; display: flex; align-items: center; gap: .4rem;
+    }
+    /* Barra de pasos */
+    .sm-step-bar { display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: var(--text-sub); }
+    .sm-step {
+      background: var(--bg-input); border: 1.5px solid var(--text-sub);
+      border-radius: 50%; width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .78rem;
+    }
+    .sm-step.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .sm-step.done   { background: var(--success); border-color: var(--success); color: #fff; }
+    .sm-step-line   { width: 30px; height: 2px; background: var(--text-sub); }
+    /* Layout */
+    .sm-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+    .sm-card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--accent);
+      border-radius: 16px;
+      padding: 2.25rem 2rem;
+      width: 100%; max-width: 520px;
+      box-shadow: 0 8px 32px rgba(233,69,96,.12);
+    }
+    .sm-card-title    { font-size: 1.3rem; font-weight: 700; margin-bottom: .25rem; }
+    .sm-card-subtitle { font-size: .82rem; color: var(--text-sub); margin-bottom: 1.4rem; }
+    hr.sm-divider     { border: none; border-top: 1px solid rgba(233,69,96,.3); margin-bottom: 1.4rem; }
+    /* Campos */
+    .sm-label { font-size: .8rem; color: var(--text-sub); margin-bottom: .28rem; display: block; }
+    .sm-label .required { color: var(--accent); margin-left: .15rem; }
+    .sm-input {
+      width: 100%; background: var(--bg-input);
+      border: 1px solid var(--text-sub); border-radius: 8px;
+      color: var(--text-main); padding: .6rem .9rem; font-size: .9rem;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .sm-input::placeholder { color: var(--text-sub); }
+    .sm-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,69,96,.15); }
+    .sm-input.is-invalid { border-color: var(--danger); }
+    .sm-input.is-valid   { border-color: var(--success); }
+    .sm-field { margin-bottom: 1.1rem; }
+    .sm-error-msg { font-size: .75rem; color: var(--danger); margin-top: .25rem; display: none; }
+    .sm-error-msg.show { display: block; }
+    .sm-input-group { position: relative; }
+    .sm-input-icon {
+      position: absolute; right: .75rem; top: 50%;
+      transform: translateY(-50%); color: var(--text-sub);
+      font-size: 1rem; cursor: pointer;
+    }
+    .sm-input-icon:hover { color: var(--accent); }
+    .sm-input-group .sm-input { padding-right: 2.5rem; }
+    .sm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .sm-row { grid-template-columns: 1fr; } .sm-card { padding: 1.5rem 1.2rem; } }
+    .sm-required-note { font-size: .75rem; color: var(--text-sub); margin-bottom: 1.2rem; }
+    .sm-required-note span { color: var(--accent); }
+    /* Toast general */
+    .sm-toast {
+      display: none; align-items: center; gap: .5rem;
+      border-radius: 8px; padding: .65rem .9rem;
+      font-size: .82rem; margin-bottom: 1rem;
+    }
+    .sm-toast.show { display: flex; }
+    .sm-toast.error   { background: rgba(255,80,80,.12); border: 1px solid var(--danger); color: var(--danger); }
+    .sm-toast.success { background: rgba(80,220,120,.12); border: 1px solid var(--success); color: var(--success); }
+    /* Botones */
+    .sm-btn-row { display: flex; gap: .75rem; margin-top: .5rem; }
+    .sm-btn-primary {
+      flex: 1; background: var(--accent); color: #fff;
+      border: none; border-radius: 10px; padding: .7rem;
+      font-size: .9rem; font-weight: 700; cursor: pointer; transition: background .2s;
+    }
+    .sm-btn-primary:hover { background: #c73450; }
+    .sm-btn-primary:disabled { background: #6b2233; cursor: not-allowed; opacity: .6; }
+    .sm-btn-secondary {
+      flex: 1; background: transparent; color: var(--text-sub);
+      border: 1px solid var(--text-sub); border-radius: 10px; padding: .7rem;
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      transition: border-color .2s, color .2s;
+      text-decoration: none; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+    .sm-btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); }
+    .sm-secure {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .75rem; color: var(--success); margin-top: 1.2rem; justify-content: center;
+    }
+    .sm-page-footer {
+      text-align: center; padding: 1rem; font-size: .75rem;
+      color: var(--text-sub); border-top: 1px solid rgba(255,255,255,.05);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="sm-navbar" role="banner">
+    <a href="01-login.html" class="sm-brand">
+      <i class="bi bi-music-note-beamed"></i> SoundManager
+    </a>
+    <div class="sm-step-bar" aria-label="Progreso del registro">
+      <div class="sm-step active" aria-current="step">1</div>
+      <div class="sm-step-line"></div>
+      <div class="sm-step">2</div>
+      <div class="sm-step-line"></div>
+      <div class="sm-step">3</div>
+      <span style="margin-left:.3rem">Paso 1 de 3 — Datos personales</span>
+    </div>
+  </nav>
+
+  <main class="sm-main" role="main">
+    <div class="sm-card" role="region" aria-label="Formulario de registro">
+
+      <h1 class="sm-card-title">Crear Cuenta</h1>
+      <p class="sm-card-subtitle">Completa los datos para registrarte en SoundManager</p>
+      <hr class="sm-divider" />
+
+      <div class="sm-toast" id="toastMsg" role="alert" aria-live="polite">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span id="toastText"></span>
+      </div>
+
+      <p class="sm-required-note">Los campos marcados con <span>*</span> son obligatorios.</p>
+
+      <form id="registerForm" novalidate>
+
+        <!-- Nombres / Apellidos -->
+        <div class="sm-row">
+          <div class="sm-field">
+            <label class="sm-label" for="nombres">Nombres <span class="required">*</span></label>
+            <input type="text" id="nombres" name="nombres" class="sm-input"
+                   placeholder="Ej: Jeinner Antony"
+                   autocomplete="given-name" aria-required="true"
+                   aria-describedby="nombresError" />
+            <span class="sm-error-msg" id="nombresError">
+              <i class="bi bi-exclamation-circle"></i> Ingresa tu nombre (mín. 2 caracteres)
+            </span>
+          </div>
+          <div class="sm-field">
+            <label class="sm-label" for="apellidos">Apellidos <span class="required">*</span></label>
+            <input type="text" id="apellidos" name="apellidos" class="sm-input"
+                   placeholder="Ej: Valencia Ortiz"
+                   autocomplete="family-name" aria-required="true"
+                   aria-describedby="apellidosError" />
+            <span class="sm-error-msg" id="apellidosError">
+              <i class="bi bi-exclamation-circle"></i> Ingresa tu apellido
+            </span>
+          </div>
+        </div>
+
+        <!-- Cédula -->
+        <div class="sm-field">
+          <label class="sm-label" for="cedula">Número de Cédula <span class="required">*</span></label>
+          <div class="sm-input-group">
+            <input type="text" id="cedula" name="cedula" class="sm-input"
+                   placeholder="Ej: 1234567890"
+                   inputmode="numeric" maxlength="10"
+                   autocomplete="off" aria-required="true"
+                   aria-describedby="cedulaError cedulaHelp" />
+            <i class="bi bi-credit-card sm-input-icon" aria-hidden="true"></i>
+          </div>
+          <span id="cedulaHelp" style="font-size:.73rem;color:var(--text-sub)">6 a 10 dígitos numéricos</span>
+          <span class="sm-error-msg" id="cedulaError">
+            <i class="bi bi-exclamation-circle"></i> Cédula inválida (6–10 dígitos numéricos)
+          </span>
+        </div>
+
+        <!-- Fecha de nacimiento -->
+        <div class="sm-field">
+          <label class="sm-label" for="fechaNac">Fecha de Nacimiento <span class="required">*</span></label>
+          <div class="sm-input-group">
+            <input type="date" id="fechaNac" name="fechaNac" class="sm-input"
+                   aria-required="true" aria-describedby="fechaError" />
+            <i class="bi bi-calendar3 sm-input-icon" style="pointer-events:none" aria-hidden="true"></i>
+          </div>
+          <span class="sm-error-msg" id="fechaError">
+            <i class="bi bi-exclamation-circle"></i> Ingresa una fecha válida
+          </span>
+        </div>
+
+        <!-- Correo -->
+        <div class="sm-field">
+          <label class="sm-label" for="emailReg">Correo electrónico <span class="required">*</span></label>
+          <div class="sm-input-group">
+            <input type="email" id="emailReg" name="email" class="sm-input"
+                   placeholder="ejemplo@correo.com"
+                   autocomplete="email" aria-required="true"
+                   aria-describedby="emailRegError" />
+            <i class="bi bi-envelope sm-input-icon" aria-hidden="true"></i>
+          </div>
+          <span class="sm-error-msg" id="emailRegError">
+            <i class="bi bi-exclamation-circle"></i> Formato de correo inválido
+          </span>
+        </div>
+
+        <!-- Contraseñas -->
+        <div class="sm-row">
+          <div class="sm-field">
+            <label class="sm-label" for="passReg">Contraseña <span class="required">*</span></label>
+            <div class="sm-input-group">
+              <input type="password" id="passReg" name="password" class="sm-input"
+                     placeholder="Mínimo 8 caracteres"
+                     autocomplete="new-password" aria-required="true"
+                     aria-describedby="passRegError" />
+              <i class="bi bi-eye sm-input-icon" id="togglePassReg"
+                 role="button" tabindex="0" aria-label="Mostrar contraseña"></i>
+            </div>
+            <span class="sm-error-msg" id="passRegError">
+              <i class="bi bi-exclamation-circle"></i> Mínimo 8 caracteres
+            </span>
+          </div>
+          <div class="sm-field">
+            <label class="sm-label" for="passConf">Confirmar contraseña <span class="required">*</span></label>
+            <div class="sm-input-group">
+              <input type="password" id="passConf" name="passConf" class="sm-input"
+                     placeholder="Repite la contraseña"
+                     autocomplete="new-password" aria-required="true"
+                     aria-describedby="passConfError" />
+              <i class="bi bi-eye sm-input-icon" id="togglePassConf"
+                 role="button" tabindex="0" aria-label="Mostrar confirmación"></i>
+            </div>
+            <span class="sm-error-msg" id="passConfError">
+              <i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden
+            </span>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="sm-btn-row">
+          <a href="01-login.html" class="sm-btn-secondary">
+            <i class="bi bi-x-lg" aria-hidden="true"></i> CANCELAR
+          </a>
+          <button type="submit" class="sm-btn-primary" id="btnRegistrar">
+            <i class="bi bi-person-check me-1" aria-hidden="true"></i> REGISTRAR
+          </button>
+        </div>
+
+      </form>
+
+      <div class="sm-secure">
+        <i class="bi bi-lock-fill" aria-hidden="true"></i>
+        Sus datos están protegidos y no serán compartidos con terceros
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="sm-page-footer" role="contentinfo">
+    Sistema de Gestión de Usuarios y Preferencias Musicales &nbsp;|&nbsp;
+    GA5-220501095-AA1-EV04 &nbsp;|&nbsp; Jeinner Antony Valencia Ortiz &nbsp;|&nbsp; Ficha 3336169
+  </footer>
+
+  <script>
+    // Toggle contraseñas
+    function togglePass(inputId, iconId) {
+      const inp  = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      icon.addEventListener('click', () => {
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        icon.className = show ? 'bi bi-eye-slash sm-input-icon' : 'bi bi-eye sm-input-icon';
+      });
+      icon.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') icon.click(); });
+    }
+    togglePass('passReg','togglePassReg');
+    togglePass('passConf','togglePassConf');
+
+    // Solo números en cédula
+    document.getElementById('cedula').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g,'');
+    });
+
+    // Validación campo a campo
+    function validateField(id, condition, errorId) {
+      const inp = document.getElementById(id);
+      const err = document.getElementById(errorId);
+      inp.addEventListener('blur', () => {
+        const ok = condition(inp.value);
+        inp.classList.toggle('is-invalid', !ok);
+        inp.classList.toggle('is-valid', ok);
+        err.classList.toggle('show', !ok);
+      });
+      inp.addEventListener('input', () => {
+        inp.classList.remove('is-invalid','is-valid');
+        err.classList.remove('show');
+      });
+    }
+    validateField('nombres',   v => v.trim().length >= 2,                    'nombresError');
+    validateField('apellidos', v => v.trim().length >= 2,                    'apellidosError');
+    validateField('cedula',    v => /^\d{6,10}$/.test(v.trim()),             'cedulaError');
+    validateField('fechaNac',  v => v !== '',                                'fechaError');
+    validateField('emailReg',  v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), 'emailRegError');
+    validateField('passReg',   v => v.length >= 8,                           'passRegError');
+
+    function showToast(msg, tipo='error') {
+      const el = document.getElementById('toastMsg');
+      el.className = 'sm-toast show ' + tipo;
+      document.getElementById('toastText').textContent = msg;
+    }
+
+    // Submit con fetch a la API
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const campos = [
+        { id:'nombres',   ok: v => v.trim().length>=2,                    err:'nombresError'  },
+        { id:'apellidos', ok: v => v.trim().length>=2,                    err:'apellidosError'},
+        { id:'cedula',    ok: v => /^\d{6,10}$/.test(v.trim()),           err:'cedulaError'   },
+        { id:'fechaNac',  ok: v => v!=='',                                err:'fechaError'    },
+        { id:'emailReg',  ok: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), err:'emailRegError'},
+        { id:'passReg',   ok: v => v.length>=8,                           err:'passRegError'  },
+      ];
+      let valid = true;
+      campos.forEach(({ id, ok, err }) => {
+        const val = document.getElementById(id).value;
+        const pass = ok(val);
+        document.getElementById(id).classList.toggle('is-invalid', !pass);
+        document.getElementById(id).classList.toggle('is-valid',   pass);
+        document.getElementById(err).classList.toggle('show', !pass);
+        if (!pass) valid = false;
+      });
+      // Confirmar contraseña
+      const p1 = document.getElementById('passReg').value;
+      const p2 = document.getElementById('passConf').value;
+      if (p1 !== p2) {
+        document.getElementById('passConf').classList.add('is-invalid');
+        document.getElementById('passConfError').classList.add('show');
+        valid = false;
+      }
+      if (!valid) return;
+
+      const btn = document.getElementById('btnRegistrar');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Registrando...';
+
+      // Construir nombre completo para enviar a la API
+      const nombre = document.getElementById('nombres').value.trim() + ' ' +
+                     document.getElementById('apellidos').value.trim();
+      const email    = document.getElementById('emailReg').value.trim();
+      const password = p1;
+
+      try {
+        const res  = await fetch('/api/auth/registro', {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({ nombre, email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showToast(data.mensaje || 'Error al crear la cuenta.');
+          return;
+        }
+
+        showToast('Cuenta creada correctamente. Redirigiendo al login...', 'success');
+        setTimeout(() => { window.location.href = '01-login.html'; }, 1800);
+
+      } catch (err) {
+        showToast('No se pudo conectar con el servidor. Verifica que esté en ejecución.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-person-check me-1"></i> REGISTRAR';
+      }
+    });
+  </script>
+
+</body>
+</html>

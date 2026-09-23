@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundManager — Iniciar Sesión</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:     #1A1A2E;
+      --bg-panel:    #16213E;
+      --bg-input:    #0F3460;
+      --accent:      #E94560;
+      --text-main:   #EAEAEA;
+      --text-sub:    #A0A0B4;
+      --success:     #50DC78;
+      --danger:      #FF5050;
+      --radius-card: 16px;
+      --radius-btn:  10px;
+      --radius-inp:  8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Navbar */
+    .sm-navbar {
+      background: var(--bg-panel);
+      padding: .75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(233,69,96,.25);
+    }
+    .sm-brand {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .sm-navbar-right { font-size: .8rem; color: var(--text-sub); }
+    /* Main */
+    .sm-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    /* Card */
+    .sm-card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-card);
+      padding: 2.25rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px rgba(233,69,96,.12);
+    }
+    .sm-card-title   { font-size: 1.35rem; font-weight: 700; margin-bottom: .35rem; }
+    .sm-card-subtitle{ font-size: .82rem; color: var(--text-sub); margin-bottom: 1.5rem; }
+    .sm-divider      { border: none; border-top: 1px solid rgba(233,69,96,.3); margin-bottom: 1.5rem; }
+    /* Inputs */
+    .sm-label { font-size: .8rem; color: var(--text-sub); margin-bottom: .3rem; display: block; }
+    .sm-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--text-sub);
+      border-radius: var(--radius-inp);
+      color: var(--text-main);
+      padding: .6rem .9rem;
+      font-size: .9rem;
+      transition: border-color .2s;
+      outline: none;
+    }
+    .sm-input::placeholder { color: var(--text-sub); }
+    .sm-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,69,96,.15); }
+    .sm-input.is-invalid { border-color: var(--danger); }
+    .sm-input.is-valid   { border-color: var(--success); }
+    .sm-input-group { position: relative; margin-bottom: 1.1rem; }
+    .sm-input-group .sm-input { padding-right: 2.5rem; }
+    .sm-input-icon {
+      position: absolute;
+      right: .75rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color .2s;
+    }
+    .sm-input-icon:hover { color: var(--accent); }
+    /* Checkbox row */
+    .sm-check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.4rem;
+      font-size: .82rem;
+    }
+    .sm-check { display: flex; align-items: center; gap: .4rem; color: var(--text-sub); cursor: pointer; }
+    .sm-check input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+    .sm-forgot { color: var(--accent); text-decoration: none; font-size: .8rem; }
+    .sm-forgot:hover { text-decoration: underline; }
+    /* Botón */
+    .sm-btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-btn);
+      padding: .7rem;
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      margin-bottom: 1.2rem;
+    }
+    .sm-btn-primary:hover   { background: #c73450; }
+    .sm-btn-primary:active  { transform: scale(.98); }
+    .sm-btn-primary:disabled{ background: #6b2233; cursor: not-allowed; opacity: .6; }
+    /* Separador */
+    .sm-or {
+      display: flex; align-items: center; gap: .6rem;
+      color: var(--text-sub); font-size: .78rem; margin-bottom: 1.2rem;
+    }
+    .sm-or::before, .sm-or::after { content:''; flex:1; border-top: 1px solid rgba(160,160,180,.3); }
+    /* Footer tarjeta */
+    .sm-card-footer { text-align: center; font-size: .82rem; color: var(--text-sub); }
+    .sm-card-footer a { color: var(--accent); text-decoration: none; }
+    .sm-card-footer a:hover { text-decoration: underline; }
+    /* Toast error */
+    .sm-toast {
+      display: none;
+      background: rgba(255,80,80,.12);
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      padding: .65rem .9rem;
+      font-size: .82rem;
+      color: var(--danger);
+      margin-bottom: 1rem;
+      align-items: center;
+      gap: .5rem;
+    }
+    .sm-toast.show { display: flex; }
+    /* Toast éxito */
+    .sm-toast-success {
+      display: none;
+      background: rgba(80,220,120,.12);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: .65rem .9rem;
+      font-size: .82rem;
+      color: var(--success);
+      margin-bottom: 1rem;
+      align-items: center;
+      gap: .5rem;
+    }
+    .sm-toast-success.show { display: flex; }
+    /* Seguridad */
+    .sm-secure {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .75rem; color: var(--success);
+      margin-top: 1.2rem; justify-content: center;
+    }
+    /* Footer página */
+    .sm-page-footer {
+      text-align: center; padding: 1rem;
+      font-size: .75rem; color: var(--text-sub);
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    @media (max-width: 480px) {
+      .sm-card { padding: 1.5rem 1.2rem; }
+      .sm-card-title { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="sm-navbar" role="banner">
+    <a href="#" class="sm-brand" aria-label="SoundManager inicio">
+      <i class="bi bi-music-note-beamed"></i> SoundManager
+    </a>
+    <span class="sm-navbar-right">v1.0 &nbsp;|&nbsp; NariTech Solutions</span>
+  </nav>
+
+  <main class="sm-main" role="main">
+    <div class="sm-card" role="region" aria-label="Formulario de inicio de sesión">
+
+      <h1 class="sm-card-title">Iniciar Sesión</h1>
+      <p class="sm-card-subtitle">Ingresa tus credenciales para acceder al sistema</p>
+      <hr class="sm-divider" />
+
+      <!-- Toast error -->
+      <div class="sm-toast" id="errorToast" role="alert" aria-live="polite">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span id="errorMsg">Credenciales incorrectas. Verifica tu correo y contraseña.</span>
+      </div>
+      <!-- Toast cargando/éxito -->
+      <div class="sm-toast-success" id="successToast" role="status" aria-live="polite">
+        <i class="bi bi-check-circle-fill"></i>
+        <span id="successMsg">Sesión iniciada. Redirigiendo...</span>
+      </div>
+
+      <form id="loginForm" novalidate>
+
+        <div class="mb-1">
+          <label class="sm-label" for="email">Usuario / Correo electrónico</label>
+        </div>
+        <div class="sm-input-group">
+          <input type="email" id="email" name="email" class="sm-input"
+                 placeholder="ejemplo@correo.com"
+                 autocomplete="email" aria-required="true" />
+          <i class="bi bi-envelope sm-input-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="mb-1">
+          <label class="sm-label" for="password">Contraseña</label>
+        </div>
+        <div class="sm-input-group">
+          <input type="password" id="password" name="password" class="sm-input"
+                 placeholder="••••••••••••"
+                 autocomplete="current-password" aria-required="true" />
+          <i class="bi bi-eye sm-input-icon" id="togglePass"
+             role="button" tabindex="0" aria-label="Mostrar u ocultar contraseña"></i>
+        </div>
+
+        <div class="sm-check-row">
+          <label class="sm-check">
+            <input type="checkbox" id="remember" name="remember" />
+            Recordarme
+          </label>
+          <a href="03-error.html" class="sm-forgot">¿Olvidó su contraseña?</a>
+        </div>
+
+        <button type="submit" class="sm-btn-primary" id="btnLogin" disabled>
+          <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>
+          INGRESAR
+        </button>
+
+      </form>
+
+      <div class="sm-or">o</div>
+
+      <div class="sm-card-footer">
+        ¿No tiene cuenta?&nbsp;
+        <a href="02-registro.html">Regístrese aquí</a>
+      </div>
+
+      <div class="sm-secure" aria-label="Conexión local segura">
+        <i class="bi bi-lock-fill" aria-hidden="true"></i>
+        Sistema local — NariTech Solutions
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="sm-page-footer" role="contentinfo">
+    Sistema de Gestión de Usuarios y Preferencias Musicales &nbsp;|&nbsp;
+    GA5-220501095-AA1-EV04 &nbsp;|&nbsp;
+    Jeinner Antony Valencia Ortiz &nbsp;|&nbsp; Ficha 3336169
+  </footer>
+
+  <script>
+    const emailInp = document.getElementById('email');
+    const passInp  = document.getElementById('password');
+    const btnLogin = document.getElementById('btnLogin');
+
+    // Habilitar botón cuando ambos campos tienen valor
+    function checkFields() {
+      btnLogin.disabled = !(emailInp.value.trim() && passInp.value.trim());
+    }
+    emailInp.addEventListener('input', checkFields);
+    passInp.addEventListener('input', checkFields);
+
+    // Toggle visibilidad contraseña
+    const togglePass = document.getElementById('togglePass');
+    togglePass.addEventListener('click', () => {
+      const isPass = passInp.type === 'password';
+      passInp.type = isPass ? 'text' : 'password';
+      togglePass.className = isPass
+        ? 'bi bi-eye-slash sm-input-icon'
+        : 'bi bi-eye sm-input-icon';
+    });
+    togglePass.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') togglePass.click();
+    });
+
+    // Quitar estado inválido al editar
+    [emailInp, passInp].forEach(inp =>
+      inp.addEventListener('input', () => inp.classList.remove('is-invalid'))
+    );
+
+    // Submit — conecta con la API REST del servidor Node/Express
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email    = emailInp.value.trim();
+      const password = passInp.value.trim();
+
+      btnLogin.disabled = true;
+      btnLogin.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Verificando...';
+      document.getElementById('errorToast').classList.remove('show');
+
+      try {
+        const res  = await fetch('/api/auth/login', {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          // Error de credenciales
+          emailInp.classList.add('is-invalid');
+          passInp.classList.add('is-invalid');
+          document.getElementById('errorMsg').textContent =
+            data.mensaje || 'Credenciales incorrectas. Verifica tu correo y contraseña.';
+          document.getElementById('errorToast').classList.add('show');
+          return;
+        }
+
+        // Guardar sesión
+        sessionStorage.setItem('sm_usuario', JSON.stringify(data.usuario));
+        document.getElementById('successMsg').textContent =
+          `Bienvenido, ${data.usuario.nombre}. Redirigiendo...`;
+        document.getElementById('successToast').classList.add('show');
+        setTimeout(() => { window.location.href = '04-dashboard.html'; }, 1200);
+
+      } catch (err) {
+        // Error de red — servidor no disponible
+        document.getElementById('errorMsg').textContent =
+          'No se pudo conectar con el servidor. Verifica que esté en ejecución.';
+        document.getElementById('errorToast').classList.add('show');
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i> INGRESAR';
+        checkFields();
+      }
+    });
+  </script>
+
+</body>
+</html>

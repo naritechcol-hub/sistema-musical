@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundManager — Error del Sistema</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:   #1A1A2E;
+      --bg-panel:  #16213E;
+      --bg-input:  #0F3460;
+      --accent:    #E94560;
+      --text-main: #EAEAEA;
+      --text-sub:  #A0A0B4;
+      --success:   #50DC78;
+      --danger:    #FF5050;
+      --warn:      #FFC850;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .sm-navbar {
+      background: var(--bg-panel);
+      padding: .75rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(233,69,96,.25);
+    }
+    .sm-brand {
+      color: var(--accent); font-weight: 700; font-size: 1.1rem;
+      text-decoration: none; display: flex; align-items: center; gap: .4rem;
+    }
+    .sm-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+    /* Card de error */
+    .sm-error-card {
+      background: var(--bg-panel);
+      border: 2px solid var(--danger);
+      border-radius: 16px;
+      padding: 2.25rem 2rem;
+      width: 100%; max-width: 500px;
+      box-shadow: 0 8px 40px rgba(255,80,80,.15);
+    }
+    .sm-err-icon {
+      width: 68px; height: 68px;
+      background: var(--danger); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: #fff; margin: 0 auto 1.2rem;
+    }
+    .sm-err-title { font-size: 1.3rem; font-weight: 700; color: var(--danger); text-align: center; margin-bottom: .5rem; }
+    .sm-err-subtitle { font-size: .82rem; color: var(--text-sub); text-align: center; margin-bottom: 1.4rem; }
+    hr.sm-divider { border: none; border-top: 1px solid rgba(255,80,80,.35); margin-bottom: 1.4rem; }
+    /* Lista errores */
+    .sm-err-list { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.6rem; }
+    .sm-err-item {
+      background: rgba(255,80,80,.08);
+      border: 1px solid rgba(255,80,80,.3);
+      border-left: 3px solid var(--danger);
+      border-radius: 8px; padding: .6rem .85rem;
+      display: flex; align-items: flex-start; gap: .55rem; font-size: .86rem;
+    }
+    .sm-err-item i { color: var(--danger); margin-top: .05rem; flex-shrink: 0; }
+    .sm-err-item.warn  { border-color: rgba(255,200,80,.35); border-left-color: var(--warn); background: rgba(255,200,80,.06); }
+    .sm-err-item.warn i { color: var(--warn); }
+    .sm-err-item.info  { border-color: rgba(80,160,255,.35); border-left-color: #50A0FF; background: rgba(80,160,255,.06); }
+    .sm-err-item.info i { color: #50A0FF; }
+    /* Código técnico */
+    .sm-err-code {
+      background: rgba(0,0,0,.3); border-radius: 6px;
+      padding: .5rem .75rem; font-family: monospace; font-size: .75rem;
+      color: var(--text-sub); margin-bottom: 1.4rem; cursor: pointer; user-select: none;
+    }
+    /* Demo bar */
+    .sm-demo-bar {
+      background: var(--bg-input); border-radius: 8px;
+      padding: .6rem .9rem; font-size: .78rem; color: var(--text-sub);
+      margin-bottom: 1.2rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    }
+    .sm-demo-bar span { font-weight: 600; color: var(--text-main); }
+    .sm-demo-btn {
+      background: var(--bg-panel); border: 1px solid var(--text-sub);
+      border-radius: 6px; padding: .25rem .6rem; font-size: .75rem;
+      color: var(--text-sub); cursor: pointer; transition: border-color .2s, color .2s;
+    }
+    .sm-demo-btn:hover, .sm-demo-btn.active { border-color: var(--accent); color: var(--accent); }
+    /* Botones */
+    .sm-btn-row { display: flex; gap: .75rem; }
+    .sm-btn-danger {
+      flex: 1; background: var(--accent); color: #fff;
+      border: none; border-radius: 10px; padding: .7rem;
+      font-size: .88rem; font-weight: 700; cursor: pointer; transition: background .2s;
+      text-align: center; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+    .sm-btn-danger:hover { background: #c73450; color: #fff; }
+    .sm-btn-ghost {
+      flex: 1; background: transparent; color: var(--text-sub);
+      border: 1px solid var(--text-sub); border-radius: 10px; padding: .7rem;
+      font-size: .88rem; font-weight: 600; cursor: pointer; transition: border-color .2s, color .2s;
+      text-align: center; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+    .sm-btn-ghost:hover { border-color: var(--text-main); color: var(--text-main); }
+    .sm-page-footer {
+      text-align: center; padding: 1rem; font-size: .75rem;
+      color: var(--text-sub); border-top: 1px solid rgba(255,255,255,.05);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="sm-navbar" role="banner">
+    <a href="01-login.html" class="sm-brand">
+      <i class="bi bi-music-note-beamed"></i> SoundManager
+    </a>
+    <span style="font-size:.8rem;color:var(--text-sub)">Notificación del sistema</span>
+  </nav>
+
+  <main class="sm-main" role="main">
+    <div class="sm-error-card" role="alertdialog" aria-labelledby="errTitle" aria-describedby="errSubtitle">
+
+      <div class="sm-err-icon" aria-hidden="true"><i class="bi bi-x-lg"></i></div>
+
+      <h1 class="sm-err-title" id="errTitle">¡Error de Validación!</h1>
+      <p class="sm-err-subtitle" id="errSubtitle">
+        Se encontraron los siguientes problemas. Por favor corrígelos e intenta de nuevo.
+      </p>
+      <hr class="sm-divider" />
+
+      <!-- Selector de escenario (demo) -->
+      <div class="sm-demo-bar">
+        <span>Escenario:</span>
+        <button class="sm-demo-btn active" onclick="showScenario('validation',this)" type="button">Validación</button>
+        <button class="sm-demo-btn" onclick="showScenario('auth',this)"       type="button">Autenticación</button>
+        <button class="sm-demo-btn" onclick="showScenario('session',this)"    type="button">Sesión</button>
+        <button class="sm-demo-btn" onclick="showScenario('server',this)"     type="button">Servidor</button>
+      </div>
+
+      <div class="sm-err-list" id="errorList" role="list" aria-label="Lista de errores"></div>
+
+      <div class="sm-err-code">
+        <i class="bi bi-code-slash"></i> Referencia técnica:
+        <span id="errCode">ERR_VALIDATION_422</span>
+        <span id="errTimestamp" style="float:right"></span>
+      </div>
+
+      <div class="sm-btn-row">
+        <a href="javascript:history.back()" class="sm-btn-ghost">
+          <i class="bi bi-arrow-left" aria-hidden="true"></i> CANCELAR
+        </a>
+        <button type="button" class="sm-btn-danger" onclick="window.location.reload()">
+          <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> REINTENTAR
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="sm-page-footer" role="contentinfo">
+    Sistema de Gestión de Usuarios y Preferencias Musicales &nbsp;|&nbsp;
+    GA5-220501095-AA1-EV04 &nbsp;|&nbsp; Jeinner Antony Valencia Ortiz &nbsp;|&nbsp; Ficha 3336169
+  </footer>
+
+  <script>
+    const scenarios = {
+      validation: {
+        code: 'ERR_VALIDATION_422',
+        items: [
+          { type:'error', icon:'bi-x-circle-fill',              msg:'El campo <strong>Usuario / Correo</strong> no puede estar vacío.' },
+          { type:'error', icon:'bi-x-circle-fill',              msg:'La <strong>contraseña</strong> debe tener mínimo 8 caracteres.' },
+          { type:'error', icon:'bi-x-circle-fill',              msg:'La <strong>cédula</strong> ingresada no es válida (6–10 dígitos numéricos).' },
+        ]
+      },
+      auth: {
+        code: 'ERR_AUTH_401',
+        items: [
+          { type:'error', icon:'bi-shield-x',                   msg:'Las <strong>credenciales ingresadas son incorrectas</strong>.' },
+          { type:'warn',  icon:'bi-exclamation-triangle-fill',  msg:'Has realizado <strong>3 intentos fallidos</strong>. Luego de 5 la cuenta será bloqueada.' },
+          { type:'info',  icon:'bi-info-circle-fill',           msg:'Si olvidaste tu contraseña, usa el enlace <strong>¿Olvidó su contraseña?</strong>' },
+        ]
+      },
+      session: {
+        code: 'ERR_SESSION_EXPIRED_403',
+        items: [
+          { type:'warn', icon:'bi-clock-history',               msg:'Tu <strong>sesión ha expirado</strong> por inactividad. Vuelve a iniciar sesión.' },
+          { type:'info', icon:'bi-info-circle-fill',            msg:'Por seguridad, las sesiones expiran después de <strong>30 minutos</strong> de inactividad.' },
+        ]
+      },
+      server: {
+        code: 'ERR_SERVER_500',
+        items: [
+          { type:'error', icon:'bi-exclamation-octagon-fill',   msg:'Ocurrió un <strong>error interno del servidor</strong>.' },
+          { type:'warn',  icon:'bi-wifi-off',                   msg:'No fue posible establecer conexión con la <strong>base de datos MySQL</strong>.' },
+          { type:'info',  icon:'bi-info-circle-fill',           msg:'Intenta de nuevo en unos minutos o contacta a <strong>soporte@naritech.co</strong>.' },
+        ]
+      }
+    };
+
+    function showScenario(key, btn) {
+      const s = scenarios[key];
+      document.getElementById('errCode').textContent = s.code;
+      document.getElementById('errTimestamp').textContent = new Date().toLocaleTimeString('es-CO');
+      const list = document.getElementById('errorList');
+      list.innerHTML = '';
+      s.items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'sm-err-item ' + (item.type==='warn' ? 'warn' : item.type==='info' ? 'info' : '');
+        div.setAttribute('role','listitem');
+        div.innerHTML = `<i class="bi ${item.icon}" aria-hidden="true"></i><span>${item.msg}</span>`;
+        list.appendChild(div);
+      });
+      document.querySelectorAll('.sm-demo-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    showScenario('validation', document.querySelector('.sm-demo-btn'));
+  </script>
+
+</body>
+</html>

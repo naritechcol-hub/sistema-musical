@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundManager — Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:   #1A1A2E;
+      --bg-panel:  #16213E;
+      --bg-input:  #0F3460;
+      --accent:    #E94560;
+      --text-main: #EAEAEA;
+      --text-sub:  #A0A0B4;
+      --success:   #50DC78;
+      --blue:      #50A0FF;
+      --yellow:    #FFC850;
+      --danger:    #FF5050;
+      --sidebar-w: 220px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-base); color: var(--text-main); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    /* Topbar */
+    .sm-topbar {
+      background: var(--bg-panel); height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem;
+      border-bottom: 1px solid rgba(233,69,96,.2);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .sm-brand { color: var(--accent); font-weight: 700; font-size: 1.05rem; text-decoration: none; display: flex; align-items: center; gap: .4rem; }
+    .sm-topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .sm-notif { position: relative; cursor: pointer; color: var(--text-sub); font-size: 1.2rem; }
+    .sm-notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--accent); color: #fff; font-size: .55rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sm-user-chip {
+      background: var(--bg-input); border: 1px solid var(--text-sub);
+      border-radius: 20px; padding: .3rem .7rem; font-size: .8rem;
+      display: flex; align-items: center; gap: .4rem; cursor: pointer;
+      text-decoration: none; color: var(--text-main);
+    }
+    .sm-avatar {
+      width: 28px; height: 28px; background: var(--accent);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; color: #fff;
+    }
+    /* Layout */
+    .sm-layout { display: flex; flex: 1; }
+    /* Sidebar */
+    .sm-sidebar {
+      width: var(--sidebar-w); background: var(--bg-panel);
+      border-right: 1px solid rgba(255,255,255,.05);
+      display: flex; flex-direction: column;
+      padding: 1rem 0; min-height: calc(100vh - 52px);
+    }
+    .sm-sidebar-section { font-size: .68rem; font-weight: 700; color: var(--text-sub); letter-spacing: .1em; padding: .4rem 1rem; margin-top: .5rem; }
+    .sm-nav-item {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .65rem 1rem; font-size: .88rem; color: var(--text-sub);
+      text-decoration: none; transition: background .15s, color .15s;
+      position: relative; cursor: pointer; border: none; background: none; width: 100%; text-align: left;
+    }
+    .sm-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-main); text-decoration: none; }
+    .sm-nav-item.active { background: rgba(15,52,96,.8); color: var(--text-main); font-weight: 600; }
+    .sm-nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--accent); border-radius: 0 2px 2px 0;
+    }
+    .sm-nav-item i { font-size: 1.05rem; width: 20px; text-align: center; }
+    .sm-nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: .65rem; padding: .1rem .4rem; border-radius: 10px; }
+    .sm-sidebar-bottom { margin-top: auto; border-top: 1px solid rgba(255,255,255,.07); padding-top: .5rem; }
+    /* Contenido */
+    .sm-content { flex: 1; padding: 1.5rem; overflow-y: auto; }
+    .sm-page-header { margin-bottom: 1.4rem; }
+    .sm-page-title { font-size: 1.2rem; font-weight: 700; margin-bottom: .2rem; }
+    .sm-page-sub { font-size: .8rem; color: var(--text-sub); }
+    /* Stats */
+    .sm-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width:900px) { .sm-stats { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:540px) { .sm-stats { grid-template-columns: 1fr; } }
+    .sm-stat-card {
+      background: var(--bg-panel); border-radius: 12px; padding: 1.1rem 1rem;
+      display: flex; align-items: center; gap: .9rem;
+      border: 1px solid rgba(255,255,255,.06); transition: border-color .2s;
+    }
+    .sm-stat-card:hover { border-color: rgba(233,69,96,.3); }
+    .sm-stat-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .sm-stat-val { font-size: 1.6rem; font-weight: 800; line-height: 1; margin-bottom: .15rem; }
+    .sm-stat-lbl { font-size: .75rem; color: var(--text-sub); }
+    /* Sección */
+    .sm-section { background: var(--bg-panel); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.2rem; border: 1px solid rgba(255,255,255,.05); }
+    .sm-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
+    .sm-section-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; }
+    /* Tabla */
+    .sm-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    .sm-table th { padding: .65rem .75rem; text-align: left; font-size: .72rem; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid rgba(255,255,255,.07); white-space: nowrap; }
+    .sm-table td { padding: .65rem .75rem; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+    .sm-table tbody tr:last-child td { border-bottom: none; }
+    .sm-table tbody tr:hover { background: rgba(255,255,255,.03); }
+    .sm-genre-badge { display: inline-block; padding: .15rem .55rem; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+    /* Search */
+    .sm-search {
+      background: var(--bg-input); border: 1px solid var(--text-sub);
+      border-radius: 8px; color: var(--text-main); padding: .4rem .75rem;
+      font-size: .84rem; outline: none; width: 200px; transition: border-color .2s;
+    }
+    .sm-search:focus { border-color: var(--accent); }
+    .sm-search::placeholder { color: var(--text-sub); }
+    /* Botones pequeños */
+    .sm-btn-sm {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: .4rem .85rem; font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: background .2s; display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .sm-btn-sm:hover { background: #c73450; }
+    .sm-btn-sm.ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--text-sub); }
+    .sm-btn-sm.ghost:hover { border-color: var(--text-main); color: var(--text-main); background: transparent; }
+    /* Acciones */
+    .sm-action-btns { display: flex; gap: .4rem; }
+    .sm-icon-btn {
+      width: 30px; height: 30px; border-radius: 6px; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: .85rem; transition: background .15s;
+    }
+    .sm-icon-btn.edit   { background: rgba(80,160,255,.15); color: var(--blue); }
+    .sm-icon-btn.edit:hover   { background: rgba(80,160,255,.3); }
+    .sm-icon-btn.delete { background: rgba(255,80,80,.15); color: var(--danger); }
+    .sm-icon-btn.delete:hover { background: rgba(255,80,80,.3); }
+    /* Modal */
+    .sm-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .sm-modal-overlay.show { display: flex; }
+    .sm-modal {
+      background: var(--bg-panel); border: 1px solid rgba(255,80,80,.3);
+      border-radius: 14px; padding: 2rem; max-width: 380px; width: 90%;
+      text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    }
+    .sm-modal-icon { width: 56px; height: 56px; background: rgba(255,80,80,.15); border: 2px solid var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--danger); margin: 0 auto 1rem; }
+    .sm-modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+    .sm-modal-sub   { font-size: .82rem; color: var(--text-sub); margin-bottom: 1.4rem; }
+    .sm-modal-btns  { display: flex; gap: .75rem; }
+    /* Toast interno */
+    .sm-internal-toast {
+      display: none; align-items: center; gap: .5rem;
+      border-radius: 8px; padding: .55rem .85rem; font-size: .82rem;
+      margin-bottom: 1rem;
+    }
+    .sm-internal-toast.show { display: flex; }
+    .sm-internal-toast.error   { background: rgba(255,80,80,.12); border: 1px solid var(--danger); color: var(--danger); }
+    .sm-internal-toast.success { background: rgba(80,220,120,.12); border: 1px solid var(--success); color: var(--success); }
+    /* Modal agregar */
+    .sm-add-modal {
+      background: var(--bg-panel); border: 1.5px solid var(--accent);
+      border-radius: 14px; padding: 1.75rem; max-width: 460px; width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    }
+    .sm-add-modal h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.2rem; }
+    .sm-field { margin-bottom: .9rem; }
+    .sm-label { font-size: .78rem; color: var(--text-sub); margin-bottom: .25rem; display: block; }
+    .sm-input {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--text-sub);
+      border-radius: 8px; color: var(--text-main); padding: .55rem .8rem;
+      font-size: .88rem; outline: none; transition: border-color .2s;
+    }
+    .sm-input:focus { border-color: var(--accent); }
+    .sm-input::placeholder { color: var(--text-sub); }
+    .sm-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    /* Filtros género */
+    .sm-filter-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .9rem; }
+    .sm-chip {
+      background: var(--bg-input); border: 1px solid var(--text-sub);
+      border-radius: 20px; padding: .2rem .65rem; font-size: .75rem;
+      color: var(--text-sub); cursor: pointer; transition: all .15s;
+    }
+    .sm-chip:hover, .sm-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(233,69,96,.1); }
+    /* Page footer */
+    .sm-page-footer { text-align: center; padding: 1rem; font-size: .75rem; color: var(--text-sub); border-top: 1px solid rgba(255,255,255,.05); }
+    @media (max-width:768px) { .sm-sidebar { display: none; } .sm-sidebar.open { display: flex; position: fixed; z-index: 150; height: 100vh; } }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="sm-topbar" role="banner">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <button style="background:none;border:none;color:var(--text-sub);font-size:1.2rem;cursor:pointer;display:none" id="btnToggleSidebar" aria-label="Abrir menú">
+        <i class="bi bi-list"></i>
+      </button>
+      <a href="#" class="sm-brand">
+        <i class="bi bi-music-note-beamed"></i> SoundManager
+      </a>
+    </div>
+    <div class="sm-topbar-right">
+      <div class="sm-notif" aria-label="Notificaciones">
+        <i class="bi bi-bell-fill"></i>
+        <span class="sm-notif-badge">3</span>
+      </div>
+      <a href="05-perfil.html" class="sm-user-chip" aria-label="Mi perfil">
+        <div class="sm-avatar" id="avatarInitial">?</div>
+        <span id="topbarNombre">Cargando...</span>
+        <i class="bi bi-chevron-down" style="font-size:.7rem;color:var(--text-sub)"></i>
+      </a>
+    </div>
+  </header>
+
+  <div class="sm-layout">
+
+    <!-- Sidebar -->
+    <aside class="sm-sidebar" id="sidebar" role="navigation" aria-label="Menú principal">
+      <div class="sm-sidebar-section">PRINCIPAL</div>
+      <button class="sm-nav-item active" id="nav-dashboard" onclick="showSection('dashboard',this)" type="button">
+        <i class="bi bi-grid-fill"></i> Dashboard
+      </button>
+      <button class="sm-nav-item" id="nav-canciones" onclick="showSection('canciones',this)" type="button">
+        <i class="bi bi-music-note-list"></i> Mis Canciones
+        <span class="sm-nav-badge" id="badge-canciones">0</span>
+      </button>
+      <button class="sm-nav-item" id="nav-auditoria" onclick="showSection('auditoria',this)" type="button">
+        <i class="bi bi-clock-history"></i> Auditoría
+      </button>
+
+      <div class="sm-sidebar-section" style="margin-top:.5rem">ADMINISTRACIÓN</div>
+      <button class="sm-nav-item" id="nav-usuarios" onclick="showSection('usuarios',this)" type="button">
+        <i class="bi bi-people-fill"></i> Usuarios
+      </button>
+
+      <div class="sm-sidebar-bottom">
+        <a href="05-perfil.html" class="sm-nav-item">
+          <i class="bi bi-person-circle"></i> Mi Perfil
+        </a>
+        <button class="sm-nav-item" id="btnLogout" type="button">
+          <i class="bi bi-box-arrow-right" style="color:var(--danger)"></i>
+          <span style="color:var(--danger)">Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="sm-content" role="main">
+
+      <!-- ─── DASHBOARD ─────────────────────────────────── -->
+      <section id="section-dashboard">
+        <div class="sm-page-header">
+          <h1 class="sm-page-title">Dashboard</h1>
+          <p class="sm-page-sub" id="saludo">Bienvenido al sistema</p>
+        </div>
+
+        <div class="sm-stats">
+          <div class="sm-stat-card">
+            <div class="sm-stat-icon" style="background:rgba(233,69,96,.15)"><i class="bi bi-music-note-beamed" style="color:var(--accent)"></i></div>
+            <div><div class="sm-stat-val" id="stat-canciones" style="color:var(--accent)">0</div><div class="sm-stat-lbl">Canciones</div></div>
+          </div>
+          <div class="sm-stat-card">
+            <div class="sm-stat-icon" style="background:rgba(80,160,255,.15)"><i class="bi bi-people-fill" style="color:var(--blue)"></i></div>
+            <div><div class="sm-stat-val" id="stat-usuarios" style="color:var(--blue)">0</div><div class="sm-stat-lbl">Usuarios</div></div>
+          </div>
+          <div class="sm-stat-card">
+            <div class="sm-stat-icon" style="background:rgba(255,200,80,.15)"><i class="bi bi-star-fill" style="color:var(--yellow)"></i></div>
+            <div><div class="sm-stat-val" id="stat-favoritas" style="color:var(--yellow)">0</div><div class="sm-stat-lbl">Favoritas</div></div>
+          </div>
+          <div class="sm-stat-card">
+            <div class="sm-stat-icon" style="background:rgba(80,220,120,.15)"><i class="bi bi-clock-fill" style="color:var(--success)"></i></div>
+            <div><div class="sm-stat-val" style="color:var(--success);font-size:1rem;padding-top:.35rem">Hoy</div><div class="sm-stat-lbl">Última sesión</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── CANCIONES ──────────────────────────────────── -->
+      <section id="section-canciones" style="display:none">
+        <div class="sm-page-header">
+          <h1 class="sm-page-title">Mis Canciones</h1>
+          <p class="sm-page-sub">Gestiona tu biblioteca musical</p>
+        </div>
+
+        <div class="sm-internal-toast" id="toast-canciones"></div>
+
+        <div class="sm-section">
+          <div class="sm-section-header">
+            <h2 class="sm-section-title">
+              <i class="bi bi-music-note-list me-2" style="color:var(--accent)"></i> Biblioteca
+            </h2>
+            <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+              <input type="search" class="sm-search" id="searchInput"
+                     placeholder="🔍  Buscar canción..." oninput="searchSongs(this.value)"
+                     aria-label="Buscar canciones" />
+              <button class="sm-btn-sm" onclick="openAddModal()" type="button">
+                <i class="bi bi-plus-lg"></i> Agregar
+              </button>
+            </div>
+          </div>
+
+          <div class="sm-filter-chips" id="filterChips">
+            <span class="sm-chip active" onclick="filterGenre(null,this)">Todos</span>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table class="sm-table" id="songsTable" aria-label="Tabla de canciones">
+              <thead>
+                <tr>
+                  <th>#</th><th>Título</th><th>Artista</th><th>Género</th>
+                  <th>Año</th><th>Favorita</th><th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="songsBody"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-sub)">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.9rem">
+            <span id="songsCount" style="font-size:.78rem;color:var(--text-sub)"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── USUARIOS ───────────────────────────────────── -->
+      <section id="section-usuarios" style="display:none">
+        <div class="sm-page-header">
+          <h1 class="sm-page-title">Usuarios del Sistema</h1>
+          <p class="sm-page-sub">Lista de cuentas registradas</p>
+        </div>
+        <div class="sm-section">
+          <div style="overflow-x:auto">
+            <table class="sm-table" aria-label="Tabla de usuarios">
+              <thead><tr><th>#</th><th>Nombre</th><th>Email</th><th>Registro</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="usersBody"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-sub)">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── AUDITORÍA ──────────────────────────────────── -->
+      <section id="section-auditoria" style="display:none">
+        <div class="sm-page-header">
+          <h1 class="sm-page-title">Registro de Auditoría</h1>
+          <p class="sm-page-sub">Historial de operaciones del sistema</p>
+        </div>
+
+        <div class="sm-section">
+          <h2 class="sm-section-title" style="margin-bottom:1rem">
+            <i class="bi bi-clock-history me-2" style="color:var(--blue)"></i>Operaciones recientes
+          </h2>
+          <div style="overflow-x:auto">
+            <table class="sm-table" aria-label="Historial de auditoría">
+              <thead><tr><th>#</th><th>Tipo</th><th>Descripción</th><th>Tabla</th><th>Fecha</th></tr></thead>
+              <tbody id="auditBody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-sub)">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal eliminar canción -->
+  <div class="sm-modal-overlay" id="deleteModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+    <div class="sm-modal">
+      <div class="sm-modal-icon"><i class="bi bi-trash3-fill"></i></div>
+      <h3 class="sm-modal-title" id="modalTitle">¿Eliminar canción?</h3>
+      <p class="sm-modal-sub" id="modalSub">Esta acción no se puede deshacer.</p>
+      <div class="sm-modal-btns">
+        <button class="sm-btn-sm ghost" style="flex:1;justify-content:center" onclick="closeDeleteModal()" type="button">
+          <i class="bi bi-x-lg"></i> Cancelar
+        </button>
+        <button class="sm-btn-sm" style="flex:1;justify-content:center;background:var(--danger)" onclick="confirmDelete()" type="button">
+          <i class="bi bi-trash3"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal agregar canción -->
+  <div class="sm-modal-overlay" id="addModal" role="dialog" aria-labelledby="addModalTitle" aria-modal="true">
+    <div class="sm-add-modal">
+      <h3 id="addModalTitle"><i class="bi bi-music-note-beamed me-2" style="color:var(--accent)"></i>Agregar Canción</h3>
+      <div class="sm-field">
+        <label class="sm-label" for="addTitulo">Título *</label>
+        <input type="text" id="addTitulo" class="sm-input" placeholder="Nombre de la canción" />
+      </div>
+      <div class="sm-field">
+        <label class="sm-label" for="addArtista">Artista *</label>
+        <input type="text" id="addArtista" class="sm-input" placeholder="Nombre del artista" />
+      </div>
+      <div class="sm-row2">
+        <div class="sm-field">
+          <label class="sm-label" for="addGenero">Género</label>
+          <select id="addGenero" class="sm-input">
+            <option value="">Seleccionar...</option>
+            <option>Rock</option><option>Pop</option><option>Jazz</option>
+            <option>Salsa</option><option>Reggaeton</option>
+            <option>Electrónica</option><option>Latina</option><option>Clásica</option>
+          </select>
+        </div>
+        <div class="sm-field">
+          <label class="sm-label" for="addAnio">Año</label>
+          <input type="number" id="addAnio" class="sm-input" placeholder="2024" min="1900" max="2099" />
+        </div>
+      </div>
+      <div class="sm-modal-btns" style="margin-top:.5rem">
+        <button class="sm-btn-sm ghost" style="flex:1;justify-content:center" onclick="closeAddModal()" type="button">
+          Cancelar
+        </button>
+        <button class="sm-btn-sm" style="flex:1;justify-content:center" onclick="guardarCancion()" type="button" id="btnGuardarCancion">
+          <i class="bi bi-floppy-fill"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="sm-page-footer" role="contentinfo">
+    Sistema de Gestión de Usuarios y Preferencias Musicales &nbsp;|&nbsp;
+    GA5-220501095-AA1-EV04 &nbsp;|&nbsp; Jeinner Antony Valencia Ortiz &nbsp;|&nbsp; Ficha 3336169
+  </footer>
+
+  <script>
+    // ── Guardia de sesión ──
+    const raw = sessionStorage.getItem('sm_usuario');
+    if (!raw) { window.location.href = '01-login.html'; }
+    const usuario = JSON.parse(raw || '{}');
+
+    // Mostrar datos del usuario en topbar
+    document.getElementById('topbarNombre').textContent = usuario.nombre || 'Usuario';
+    const initials = (usuario.nombre || 'U').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    document.getElementById('avatarInitial').textContent = initials;
+    document.getElementById('saludo').textContent = `Bienvenido, ${usuario.nombre || 'usuario'}`;
+
+    // ── Navegación entre secciones ──
+    const secciones = ['dashboard','canciones','usuarios','auditoria'];
+    function showSection(name, btn) {
+      secciones.forEach(s => {
+        document.getElementById('section-'+s).style.display = (s===name) ? 'block' : 'none';
+      });
+      document.querySelectorAll('.sm-nav-item').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      if (name==='canciones') cargarCanciones();
+      if (name==='usuarios')  cargarUsuarios();
+      if (name==='auditoria') cargarAuditoria();
+      if (name==='dashboard') cargarStats();
+    }
+
+    // Sidebar responsive
+    document.getElementById('btnToggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // Cerrar sesión
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      try { await fetch('/api/auth/logout', { method:'POST' }); } catch(_){}
+      sessionStorage.removeItem('sm_usuario');
+      window.location.href = '01-login.html';
+    });
+
+    // ── Utilidades ──
+    function fmt(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('es-CO',{ day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit' });
+    }
+    function toast(id, msg, tipo='success') {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'sm-internal-toast show ' + tipo;
+      el.innerHTML = `<i class="bi bi-${tipo==='success'?'check-circle-fill':'exclamation-circle-fill'}"></i> ${msg}`;
+      setTimeout(() => el.className = 'sm-internal-toast', 3500);
+    }
+
+    // ── ESTADÍSTICAS ──
+    async function cargarStats() {
+      try {
+        const [rc, ru, ra] = await Promise.all([
+          fetch('/api/canciones').then(r=>r.json()),
+          fetch('/api/usuarios').then(r=>r.json()),
+          fetch('/api/auditoria').then(r=>r.json()),
+        ]);
+        document.getElementById('stat-canciones').textContent = Array.isArray(rc) ? rc.length : 0;
+        document.getElementById('stat-usuarios').textContent  = Array.isArray(ru) ? ru.length : 0;
+        document.getElementById('badge-canciones').textContent = Array.isArray(rc) ? rc.length : 0;
+        // Favoritas (campo fav en local data — en producción vendría de BD)
+        document.getElementById('stat-favoritas').textContent = 0;
+      } catch(e) { console.error(e); }
+    }
+
+    // ── CANCIONES ──
+    let allSongs = [];
+    let filterActive = null;
+    let deleteTarget = null;
+
+    const genreColors = {
+      Rock:         { bg:'rgba(233,69,96,.15)',   fg:'#E94560' },
+      Pop:          { bg:'rgba(80,160,255,.15)',  fg:'#50A0FF' },
+      Electrónica:  { bg:'rgba(255,200,80,.15)',  fg:'#FFC850' },
+      Latina:       { bg:'rgba(80,220,120,.15)',  fg:'#50DC78' },
+      Jazz:         { bg:'rgba(160,80,255,.15)',  fg:'#A050FF' },
+      Salsa:        { bg:'rgba(255,160,50,.15)',  fg:'#FFA032' },
+      Reggaeton:    { bg:'rgba(50,220,200,.15)',  fg:'#32DCC8' },
+      Clásica:      { bg:'rgba(200,200,80,.15)',  fg:'#C8C850' },
+    };
+
+    async function cargarCanciones() {
+      try {
+        const data = await fetch('/api/canciones').then(r=>r.json());
+        allSongs = Array.isArray(data) ? data : [];
+        renderSongs(allSongs);
+        buildFilterChips();
+        document.getElementById('badge-canciones').textContent = allSongs.length;
+      } catch(e) {
+        document.getElementById('songsBody').innerHTML =
+          '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--danger)">Error al cargar canciones.</td></tr>';
+      }
+    }
+
+    function renderSongs(list) {
+      const tbody = document.getElementById('songsBody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-sub)">No hay canciones registradas.</td></tr>';
+        document.getElementById('songsCount').textContent = '';
+        return;
+      }
+      tbody.innerHTML = list.map((s,i) => {
+        const gc = genreColors[s.genero] || { bg:'rgba(160,160,180,.12)', fg:'#A0A0B4' };
+        return `<tr>
+          <td>${i+1}</td>
+          <td><strong>${s.titulo}</strong></td>
+          <td>${s.artista}</td>
+          <td><span class="sm-genre-badge" style="background:${gc.bg};color:${gc.fg}">${s.genero||'—'}</span></td>
+          <td>${s.anio||'—'}</td>
+          <td style="text-align:center"><i class="bi bi-star" style="color:var(--text-sub)" aria-label="No favorita"></i></td>
+          <td>
+            <div class="sm-action-btns">
+              <button class="sm-icon-btn delete" onclick="openDeleteModal(${s.id_cancion},'${s.titulo.replace(/'/g,"\\'")}','cancion')" aria-label="Eliminar ${s.titulo}" type="button">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+      document.getElementById('songsCount').textContent =
+        `Mostrando ${list.length} de ${allSongs.length} canciones`;
+    }
+
+    function buildFilterChips() {
+      const generos = [...new Set(allSongs.map(s=>s.genero).filter(Boolean))];
+      const container = document.getElementById('filterChips');
+      container.innerHTML = '<span class="sm-chip active" onclick="filterGenre(null,this)">Todos</span>';
+      generos.forEach(g => {
+        const chip = document.createElement('span');
+        chip.className = 'sm-chip';
+        chip.textContent = g;
+        chip.onclick = function() { filterGenre(g, this); };
+        container.appendChild(chip);
+      });
+    }
+
+    function filterGenre(genre, chip) {
+      filterActive = genre;
+      document.querySelectorAll('.sm-chip').forEach(c => c.classList.remove('active'));
+      if (chip) chip.classList.add('active');
+      const base = genre ? allSongs.filter(s=>s.genero===genre) : allSongs;
+      renderSongs(base);
+    }
+
+    function searchSongs(q) {
+      const base = filterActive ? allSongs.filter(s=>s.genero===filterActive) : allSongs;
+      renderSongs(q ? base.filter(s =>
+        s.titulo.toLowerCase().includes(q.toLowerCase()) ||
+        s.artista.toLowerCase().includes(q.toLowerCase())
+      ) : base);
+    }
+
+    // Modal agregar
+    function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+    function closeAddModal() {
+      document.getElementById('addModal').classList.remove('show');
+      ['addTitulo','addArtista','addAnio'].forEach(id => document.getElementById(id).value='');
+      document.getElementById('addGenero').value='';
+    }
+    async function guardarCancion() {
+      const titulo  = document.getElementById('addTitulo').value.trim();
+      const artista = document.getElementById('addArtista').value.trim();
+      const genero  = document.getElementById('addGenero').value;
+      const anio    = document.getElementById('addAnio').value;
+      if (!titulo || !artista) { alert('Título y artista son obligatorios.'); return; }
+      const btn = document.getElementById('btnGuardarCancion');
+      btn.disabled = true;
+      try {
+        const res  = await fetch('/api/canciones', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ titulo, artista, genero, anio:anio||null, idUsuario: usuario.id_usuario||1 })
+        });
+        const data = await res.json();
+        if (!res.ok) { toast('toast-canciones', data.mensaje||'Error al guardar.','error'); return; }
+        closeAddModal();
+        toast('toast-canciones', 'Canción agregada correctamente.', 'success');
+        cargarCanciones();
+        cargarStats();
+      } catch(e) { toast('toast-canciones','Error de conexión con el servidor.','error'); }
+      finally { btn.disabled=false; }
+    }
+
+    // Modal eliminar
+    function openDeleteModal(id, nombre) {
+      deleteTarget = { id, tipo:'cancion' };
+      document.getElementById('modalSub').textContent = `¿Deseas eliminar "${nombre}"? Esta acción no se puede deshacer.`;
+      document.getElementById('deleteModal').classList.add('show');
+    }
+    function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); deleteTarget=null; }
+    async function confirmDelete() {
+      if (!deleteTarget) return;
+      const endpoint = `/api/canciones/${deleteTarget.id}`;
+      closeDeleteModal();
+      try {
+        await fetch(endpoint, { method:'DELETE' });
+        toast('toast-canciones','Canción eliminada correctamente.','success');
+        cargarCanciones();
+        cargarStats();
+      } catch(e) { toast('toast-canciones','Error al eliminar.','error'); }
+    }
+    document.addEventListener('keydown', e => { if (e.key==='Escape') { closeDeleteModal(); closeAddModal(); } });
+
+    // ── USUARIOS ──
+    async function cargarUsuarios() {
+      try {
+        const data = await fetch('/api/usuarios').then(r=>r.json());
+        const tbody = document.getElementById('usersBody');
+        if (!Array.isArray(data)||!data.length) {
+          tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-sub)">No hay usuarios.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.map((u,i) => `<tr>
+          <td>${i+1}</td>
+          <td>${u.nombre}</td>
+          <td>${u.email}</td>
+          <td>${fmt(u.created_at)}</td>
+          <td><span class="sm-genre-badge" style="background:rgba(80,220,120,.15);color:var(--success)">Activo</span></td>
+          <td>
+            <button class="sm-icon-btn delete" onclick="desactivarUsuario(${u.id_usuario},'${u.nombre}')" type="button" aria-label="Desactivar ${u.nombre}">
+              <i class="bi bi-person-dash-fill"></i>
+            </button>
+          </td>
+        </tr>`).join('');
+      } catch(e) {
+        document.getElementById('usersBody').innerHTML=
+          '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--danger)">Error al cargar usuarios.</td></tr>';
+      }
+    }
+
+    async function desactivarUsuario(id, nombre) {
+      if (!confirm(`¿Desactivar al usuario "${nombre}"?`)) return;
+      try {
+        await fetch(`/api/usuarios/${id}`, { method:'DELETE' });
+        cargarUsuarios();
+      } catch(e) {}
+    }
+
+    // ── AUDITORÍA ──
+    async function cargarAuditoria() {
+      try {
+        const data = await fetch('/api/auditoria').then(r=>r.json());
+        const tbody = document.getElementById('auditBody');
+        if (!Array.isArray(data)||!data.length) {
+          tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-sub)">Sin registros.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.map((a,i) => `<tr>
+          <td>${i+1}</td>
+          <td><span class="sm-genre-badge" style="background:rgba(80,160,255,.15);color:var(--blue)">${a.tipo_op||'—'}</span></td>
+          <td>${a.descripcion||'—'}</td>
+          <td>${a.tabla_afectada||'—'}</td>
+          <td>${fmt(a.fecha)}</td>
+        </tr>`).join('');
+      } catch(e) {
+        document.getElementById('auditBody').innerHTML=
+          '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--danger)">Error al cargar auditoría.</td></tr>';
+      }
+    }
+
+    // ── Carga inicial ──
+    cargarStats();
+  </script>
+
+</body>
+</html>
