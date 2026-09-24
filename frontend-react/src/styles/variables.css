@@ -1,0 +1,19 @@
+/* src/styles/variables.css
+   Paleta y tokens fieles al diseño original (public-legacy/*.html) */
+:root {
+  --bg-base:     #1A1A2E;
+  --bg-panel:    #16213E;
+  --bg-input:    #0F3460;
+  --accent:      #E94560;
+  --text-main:   #EAEAEA;
+  --text-sub:    #A0A0B4;
+  --success:     #50DC78;
+  --danger:      #FF5050;
+  --warn:        #FFC850;
+  --blue:        #50A0FF;
+  --yellow:      #FFC850;
+  --sidebar-w:   220px;
+  --radius-card: 16px;
+  --radius-btn:  10px;
+  --radius-inp:  8px;
+}

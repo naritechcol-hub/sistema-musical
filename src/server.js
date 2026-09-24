@@ -5,6 +5,7 @@
 
 require('dotenv').config();
 const express  = require('express');
+const cors     = require('cors');
 const path     = require('path');
 const { verificarConexion } = require('./config/db');
 
@@ -18,6 +19,8 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── MIDDLEWARES ────────────────────────────────────────────
+// Habilita CORS para el frontend React (Vite corre en otro puerto)
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,14 +33,14 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/canciones', cancionRoutes);
 app.use('/api/auditoria', auditoriaRoutes);
 
-// Ruta raíz — redirige al index.html
+// Ruta raíz — redirige al login histórico (public-legacy)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/01-login.html'));
+  res.sendFile(path.join(__dirname, '../public-legacy/01-login.html'));
 });
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res) => {
- res.sendFile(path.join(__dirname, '../public/01-login.html'));
+ res.sendFile(path.join(__dirname, '../public-legacy/01-login.html'));
 });
 
 // Manejo global de errores

@@ -25,4 +25,14 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// PUT /api/usuarios/:id — actualiza el perfil del usuario
+router.put('/:id', async (req, res) => {
+  try {
+    const resultado = await UsuarioController.actualizar(req.params.id, req.body);
+    res.json(resultado);
+  } catch (err) {
+    res.status(400).json({ mensaje: err.message });
+  }
+});
+
 module.exports = router;

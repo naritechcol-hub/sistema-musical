@@ -1,0 +1,84 @@
+/* src/styles/error.css — fiel a public-legacy/03-error.html */
+
+/* Card de error */
+.sm-error-card {
+  background: var(--bg-panel);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-card);
+  padding: 2.25rem 2rem;
+  width: 100%; max-width: 500px;
+  box-shadow: 0 8px 40px rgba(255, 80, 80, .15);
+}
+
+.sm-err-icon {
+  width: 68px; height: 68px;
+  background: var(--danger); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: #fff; margin: 0 auto 1.2rem;
+}
+
+.sm-err-title { font-size: 1.3rem; font-weight: 700; color: var(--danger); text-align: center; margin-bottom: .5rem; }
+.sm-err-subtitle { font-size: .82rem; color: var(--text-sub); text-align: center; margin-bottom: 1.4rem; }
+hr.sm-divider { border: none; border-top: 1px solid rgba(255, 80, 80, .35); margin-bottom: 1.4rem; }
+
+.sm-err-list { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.6rem; }
+
+.sm-err-item {
+  background: rgba(255, 80, 80, .08);
+  border: 1px solid rgba(255, 80, 80, .3);
+  border-left: 3px solid var(--danger);
+  border-radius: 8px; padding: .6rem .85rem;
+  display: flex; align-items: flex-start; gap: .55rem; font-size: .86rem;
+}
+
+.sm-err-item i { color: var(--danger); margin-top: .05rem; flex-shrink: 0; }
+.sm-err-item.warn  { border-color: rgba(255, 200, 80, .35); border-left-color: var(--warn); background: rgba(255, 200, 80, .06); }
+.sm-err-item.warn i { color: var(--warn); }
+.sm-err-item.info  { border-color: rgba(80, 160, 255, .35); border-left-color: var(--blue); background: rgba(80, 160, 255, .06); }
+.sm-err-item.info i { color: var(--blue); }
+
+.sm-err-code {
+  background: rgba(0, 0, 0, .3); border-radius: 6px;
+  padding: .5rem .75rem; font-family: monospace; font-size: .75rem;
+  color: var(--text-sub); margin-bottom: 1.4rem; cursor: pointer; user-select: none;
+}
+
+/* Demo bar */
+.sm-demo-bar {
+  background: var(--bg-input); border-radius: 8px;
+  padding: .6rem .9rem; font-size: .78rem; color: var(--text-sub);
+  margin-bottom: 1.2rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+}
+
+.sm-demo-bar span { font-weight: 600; color: var(--text-main); }
+
+.sm-demo-btn {
+  background: var(--bg-panel); border: 1px solid var(--text-sub);
+  border-radius: 6px; padding: .25rem .6rem; font-size: .75rem;
+  color: var(--text-sub); cursor: pointer; transition: border-color .2s, color .2s;
+}
+
+.sm-demo-btn:hover, .sm-demo-btn.active { border-color: var(--accent); color: var(--accent); }
+
+/* Botones */
+.sm-btn-row { display: flex; gap: .75rem; }
+
+.sm-btn-danger {
+  flex: 1; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-btn); padding: .7rem;
+  font-size: .88rem; font-weight: 700; cursor: pointer; transition: background .2s;
+  text-align: center; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+}
+
+.sm-btn-danger:hover { background: #c73450; color: #fff; }
+
+.sm-btn-ghost {
+  flex: 1; background: transparent; color: var(--text-sub);
+  border: 1px solid var(--text-sub); border-radius: var(--radius-btn); padding: .7rem;
+  font-size: .88rem; font-weight: 600; cursor: pointer; transition: border-color .2s, color .2s;
+  text-align: center; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+}
+
+.sm-btn-ghost:hover { border-color: var(--text-main); color: var(--text-main); }

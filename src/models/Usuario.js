@@ -45,6 +45,15 @@ static async crear(nombre, apellidos, cedula, fecha_nac, email, passwordPlano) {
       [idUsuario]
     );
   }
+
+  // Actualizar datos personales editables del usuario (la cédula no se modifica)
+  static async actualizar(idUsuario, { nombre, apellidos, fecha_nac, email }) {
+    const [result] = await pool.execute(
+      'UPDATE usuario SET nombre = ?, apellidos = ?, fecha_nac = ?, email = ? WHERE id_usuario = ?',
+      [nombre, apellidos, fecha_nac, email, idUsuario]
+    );
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = Usuario;

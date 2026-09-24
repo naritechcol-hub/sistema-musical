@@ -1,0 +1,174 @@
+/* src/styles/dashboard.css — fiel a public-legacy/04-dashboard.html */
+
+/* Stats */
+.sm-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) { .sm-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .sm-stats { grid-template-columns: 1fr; } }
+
+.sm-stat-card {
+  background: var(--bg-panel); border-radius: 12px; padding: 1.1rem 1rem;
+  display: flex; align-items: center; gap: .9rem;
+  border: 1px solid rgba(255, 255, 255, .06); transition: border-color .2s;
+}
+
+.sm-stat-card:hover { border-color: rgba(233, 69, 96, .3); }
+.sm-stat-icon {
+  width: 46px; height: 46px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; flex-shrink: 0;
+}
+
+.sm-stat-val { font-size: 1.6rem; font-weight: 800; line-height: 1; margin-bottom: .15rem; }
+.sm-stat-lbl { font-size: .75rem; color: var(--text-sub); }
+
+/* Secciones */
+.sm-section {
+  background: var(--bg-panel); border-radius: 12px;
+  padding: 1.25rem; margin-bottom: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, .05);
+}
+
+.sm-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
+}
+
+.sm-section-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; }
+
+/* Tablas */
+.sm-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.sm-table th {
+  padding: .65rem .75rem; text-align: left; font-size: .72rem;
+  font-weight: 700; color: var(--text-sub); text-transform: uppercase;
+  letter-spacing: .06em; border-bottom: 1px solid rgba(255, 255, 255, .07);
+  white-space: nowrap;
+}
+
+.sm-table td {
+  padding: .65rem .75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .04);
+  vertical-align: middle;
+}
+
+.sm-table tbody tr:last-child td { border-bottom: none; }
+.sm-table tbody tr:hover { background: rgba(255, 255, 255, .03); }
+
+.sm-genre-badge {
+  display: inline-block; padding: .15rem .55rem;
+  border-radius: 20px; font-size: .75rem; font-weight: 600;
+}
+
+/* Búsqueda */
+.sm-search {
+  background: var(--bg-input); border: 1px solid var(--text-sub);
+  border-radius: 8px; color: var(--text-main); padding: .4rem .75rem;
+  font-size: .84rem; outline: none; width: 200px; transition: border-color .2s;
+}
+
+.sm-search:focus { border-color: var(--accent); }
+.sm-search::placeholder { color: var(--text-sub); }
+
+/* Botones pequeños */
+.sm-btn-sm {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; padding: .4rem .85rem; font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: background .2s;
+  display: inline-flex; align-items: center; gap: .35rem;
+}
+
+.sm-btn-sm:hover { background: #c73450; }
+.sm-btn-sm:disabled { opacity: .6; cursor: not-allowed; }
+.sm-btn-sm.ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--text-sub); }
+.sm-btn-sm.ghost:hover { border-color: var(--text-main); color: var(--text-main); background: transparent; }
+
+/* Acciones de fila */
+.sm-action-btns { display: flex; gap: .4rem; }
+.sm-icon-btn {
+  width: 30px; height: 30px; border-radius: 6px; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: .85rem; transition: background .15s;
+}
+
+.sm-icon-btn.edit   { background: rgba(80, 160, 255, .15); color: var(--blue); }
+.sm-icon-btn.edit:hover   { background: rgba(80, 160, 255, .3); }
+.sm-icon-btn.delete { background: rgba(255, 80, 80, .15); color: var(--danger); }
+.sm-icon-btn.delete:hover { background: rgba(255, 80, 80, .3); }
+
+/* Modales */
+.sm-modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .6); z-index: 200;
+  align-items: center; justify-content: center;
+}
+
+.sm-modal-overlay.show { display: flex; }
+
+.sm-modal {
+  background: var(--bg-panel); border: 1px solid rgba(255, 80, 80, .3);
+  border-radius: 14px; padding: 2rem; max-width: 380px; width: 90%;
+  text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+}
+
+.sm-modal-icon {
+  width: 56px; height: 56px; background: rgba(255, 80, 80, .15);
+  border: 2px solid var(--danger); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: var(--danger); margin: 0 auto 1rem;
+}
+
+.sm-modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+.sm-modal-sub   { font-size: .82rem; color: var(--text-sub); margin-bottom: 1.4rem; }
+.sm-modal-btns  { display: flex; gap: .75rem; }
+
+/* Modal agregar */
+.sm-add-modal {
+  background: var(--bg-panel); border: 1.5px solid var(--accent);
+  border-radius: 14px; padding: 1.75rem; max-width: 460px; width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+}
+
+.sm-add-modal h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.2rem; }
+
+.sm-field { margin-bottom: .9rem; }
+.sm-label { font-size: .78rem; color: var(--text-sub); margin-bottom: .25rem; display: block; }
+
+.sm-input {
+  width: 100%; background: var(--bg-input); border: 1px solid var(--text-sub);
+  border-radius: 8px; color: var(--text-main); padding: .55rem .8rem;
+  font-size: .88rem; outline: none; transition: border-color .2s;
+}
+
+.sm-input:focus { border-color: var(--accent); }
+.sm-input::placeholder { color: var(--text-sub); }
+.sm-input:disabled { opacity: .5; cursor: not-allowed; }
+
+.sm-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+@media (max-width: 480px) { .sm-row2 { grid-template-columns: 1fr; } }
+
+/* Toast interno */
+.sm-internal-toast {
+  display: none; align-items: center; gap: .5rem;
+  border-radius: 8px; padding: .55rem .85rem; font-size: .82rem;
+  margin-bottom: 1rem;
+}
+
+.sm-internal-toast.show { display: flex; }
+.sm-internal-toast.error   { background: rgba(255, 80, 80, .12); border: 1px solid var(--danger); color: var(--danger); }
+.sm-internal-toast.success { background: rgba(80, 220, 120, .12); border: 1px solid var(--success); color: var(--success); }
+
+/* Filtros de género */
+.sm-filter-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .9rem; }
+
+.sm-chip {
+  background: var(--bg-input); border: 1px solid var(--text-sub);
+  border-radius: 20px; padding: .2rem .65rem; font-size: .75rem;
+  color: var(--text-sub); cursor: pointer; transition: all .15s;
+}
+
+.sm-chip:hover, .sm-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(233, 69, 96, .1); }
+
+.sm-table-count { font-size: .78rem; color: var(--text-sub); }

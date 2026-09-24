@@ -1,0 +1,109 @@
+/* src/styles/registro.css — fiel a public-legacy/02-registro.html */
+
+/* Indicador de pasos */
+.sm-step-bar { display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: var(--text-sub); }
+
+.sm-step {
+  background: var(--bg-input); border: 1.5px solid var(--text-sub);
+  border-radius: 50%; width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .78rem;
+}
+
+.sm-step.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sm-step.done   { background: var(--success); border-color: var(--success); color: #fff; }
+.sm-step-line   { width: 30px; height: 2px; background: var(--text-sub); }
+
+/* Tarjeta */
+.sm-card {
+  background: var(--bg-panel);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-card);
+  padding: 2.25rem 2rem;
+  width: 100%; max-width: 520px;
+  box-shadow: 0 8px 32px rgba(233, 69, 96, .12);
+}
+
+.sm-card-title    { font-size: 1.3rem; font-weight: 700; margin-bottom: .25rem; }
+.sm-card-subtitle { font-size: .82rem; color: var(--text-sub); margin-bottom: 1.4rem; }
+hr.sm-divider     { border: none; border-top: 1px solid rgba(233, 69, 96, .3); margin-bottom: 1.4rem; }
+
+.sm-label { font-size: .8rem; color: var(--text-sub); margin-bottom: .28rem; display: block; }
+.sm-label .required { color: var(--accent); margin-left: .15rem; }
+
+.sm-input {
+  width: 100%; background: var(--bg-input);
+  border: 1px solid var(--text-sub); border-radius: var(--radius-inp);
+  color: var(--text-main); padding: .6rem .9rem; font-size: .9rem;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+
+.sm-input::placeholder { color: var(--text-sub); }
+.sm-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233, 69, 96, .15); }
+.sm-input.is-invalid { border-color: var(--danger); }
+.sm-input.is-valid   { border-color: var(--success); }
+
+.sm-field { margin-bottom: 1.1rem; }
+.sm-error-msg { font-size: .75rem; color: var(--danger); margin-top: .25rem; display: none; }
+.sm-error-msg.show { display: block; }
+
+.sm-input-group { position: relative; }
+.sm-input-group .sm-input { padding-right: 2.5rem; }
+.sm-input-icon {
+  position: absolute; right: .75rem; top: 50%;
+  transform: translateY(-50%); color: var(--text-sub);
+  font-size: 1rem; cursor: pointer;
+}
+
+.sm-input-icon:hover { color: var(--accent); }
+
+.sm-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .sm-row { grid-template-columns: 1fr; }
+  .sm-card { padding: 1.5rem 1.2rem; }
+}
+
+.sm-required-note { font-size: .75rem; color: var(--text-sub); margin-bottom: 1.2rem; }
+.sm-required-note span { color: var(--accent); }
+
+/* Toast general */
+.sm-toast {
+  display: none; align-items: center; gap: .5rem;
+  border-radius: 8px; padding: .65rem .9rem;
+  font-size: .82rem; margin-bottom: 1rem;
+}
+
+.sm-toast.show { display: flex; }
+.sm-toast.error   { background: rgba(255, 80, 80, .12); border: 1px solid var(--danger); color: var(--danger); }
+.sm-toast.success { background: rgba(80, 220, 120, .12); border: 1px solid var(--success); color: var(--success); }
+
+/* Botones */
+.sm-btn-row { display: flex; gap: .75rem; margin-top: .5rem; }
+
+.sm-btn-primary {
+  flex: 1; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-btn); padding: .7rem;
+  font-size: .9rem; font-weight: 700; cursor: pointer; transition: background .2s;
+}
+
+.sm-btn-primary:hover { background: #c73450; }
+.sm-btn-primary:disabled { background: #6b2233; cursor: not-allowed; opacity: .6; }
+
+.sm-btn-secondary {
+  flex: 1; background: transparent; color: var(--text-sub);
+  border: 1px solid var(--text-sub); border-radius: var(--radius-btn); padding: .7rem;
+  font-size: .9rem; font-weight: 600; cursor: pointer;
+  transition: border-color .2s, color .2s;
+  text-decoration: none; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+}
+
+.sm-btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); }
+
+.sm-secure {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .75rem; color: var(--success); margin-top: 1.2rem; justify-content: center;
+}
