@@ -6,14 +6,25 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+// TLS opcional: los servicios gestionados (por ejemplo Aiven) exigen conexión cifrada.
+// DB_SSL=true activa TLS; DB_SSL_CA puede traer el certificado de la CA en texto
+// (con saltos de línea escritos como \n si la plataforma no admite multilínea).
+function opcionesSsl() {
+  if (String(process.env.DB_SSL || '').toLowerCase() !== 'true') return undefined;
+  const ssl = { rejectUnauthorized: true };
+  if (process.env.DB_SSL_CA) ssl.ca = process.env.DB_SSL_CA.replace(/\\n/g, '\n');
+  return ssl;
+}
+
 // createPool crea un grupo de conexiones reutilizables.
 // Es más eficiente que abrir y cerrar una conexión por cada consulta.
 const pool = mysql.createPool({
   host     : process.env.DB_HOST,
-  port     : process.env.DB_PORT,
+  port     : Number(process.env.DB_PORT) || 3306,
   user     : process.env.DB_USER,
   password : process.env.DB_PASSWORD,
   database : process.env.DB_NAME,
+  ssl      : opcionesSsl(),
   waitForConnections : true,
   connectionLimit    : 10,
   queueLimit         : 0
@@ -31,4 +42,4 @@ async function verificarConexion() {
   }
 }
 
-module.exports = { pool, verificarConexion };
+module.exports = { pool, verificarConexion, opcionesSsl };

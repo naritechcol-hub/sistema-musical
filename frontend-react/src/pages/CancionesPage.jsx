@@ -77,7 +77,10 @@ function CancionesPage() {
   async function confirmarEliminar() {
     if (!deleteTarget) return;
     try {
-      await peticion(`/api/canciones/${deleteTarget.id}`, { method: 'DELETE' });
+      await peticion(`/api/canciones/${deleteTarget.id}`, {
+        method: 'DELETE',
+        body: { idUsuario: usuario.id_usuario },
+      });
       setDeleteTarget(null);
       setToast({ msg: 'Canción eliminada correctamente.', type: 'success' });
       cargarCanciones();

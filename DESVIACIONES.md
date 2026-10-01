@@ -61,3 +61,51 @@ La ruta de trabajo `public/` se restauró como **`public-legacy/`** para conserv
 - Estadísticas del dashboard calculadas en cliente desde `/api/canciones`, `/api/usuarios`, `/api/auditoria` (como el HTML original; no existe `/api/stats`).
 - El contador de canciones del sidebar se sincroniza mediante el evento `canciones:updated` disparado al crear/eliminar canciones.
 - Accesibilidad: roles ARIA (`banner`, `main`, `contentinfo`, `dialog`, `alertdialog`), `aria-live` en toasts y errores, `aria-required`, toggle de contraseña accesible por teclado, Esc cierra modales.
+
+---
+
+# Fase 3: integración de módulos, pruebas y preparación para despliegue
+
+Cambios hechos sobre el proyecto de la Fase 2. Todos están cubiertos por pruebas automáticas (`npm test` en la raíz y en `frontend-react/`).
+
+## Cambios en el backend
+
+| # | Cambio | Archivos | Motivo |
+|---|--------|----------|--------|
+| 1 | La aplicación Express se separa del arranque: `app.js` ensambla middlewares y rutas, `server.js` solo abre el puerto | `src/app.js`, `src/server.js` | Poder probar la API sin abrir el puerto de producción |
+| 2 | CORS configurable con `CORS_ORIGIN` (lista separada por comas). Sin la variable se permite cualquier origen, como antes | `src/app.js` | En producción solo el dominio del frontend debe consumir la API |
+| 3 | Ruta `GET /api/health` que consulta la BD | `src/app.js` | Verificación de salud para la plataforma de despliegue |
+| 4 | TLS opcional hacia MySQL (`DB_SSL`, `DB_SSL_CA`) y puerto numérico con valor por defecto 3306 | `src/config/db.js` | Los servicios gestionados de MySQL exigen conexión cifrada |
+| 5 | Corrección: `Usuario.actualizar` convierte `apellidos` y `fecha_nac` ausentes en `NULL` | `src/models/Usuario.js` | Un `PUT` sin esos campos fallaba con `Bind parameters must not contain undefined` y el mensaje interno llegaba al cliente |
+| 6 | Corrección: `Cancion.crear` convierte `genero` y `anio` ausentes en `NULL` | `src/models/Cancion.js` | Crear una canción solo con título y artista devolvía error 500 por el mismo motivo |
+| 7 | `DELETE /api/canciones/:id` audita la baja a nombre del usuario que la ejecuta (`idUsuario` en el cuerpo o la consulta; 1 si no llega) | `src/routes/cancionRoutes.js` | El usuario 1 estaba fijo; en una base nueva podía no existir y la auditoría fallaba por llave foránea |
+
+## Cambios en el frontend
+
+| # | Cambio | Archivos |
+|---|--------|----------|
+| 1 | `VITE_API_URL` define la URL base de la API en producción; en desarrollo queda vacía y sigue funcionando el proxy de Vite | `src/utils/api.js`, `.env.example` |
+| 2 | La baja de canciones envía el id del usuario en sesión | `src/pages/CancionesPage.jsx` |
+| 3 | Reescritura de rutas a `index.html` para que React Router funcione al recargar cualquier ruta | `vercel.json` |
+
+## Archivos nuevos
+
+`test/` (pruebas del backend), `src/**/*.test.js` (pruebas del frontend), `.env.example`, `.env.test.example`, `render.yaml`, `sistema_musical_seed_minimo.sql`, `README.md`.
+
+## Limitaciones conocidas (sin corregir)
+
+1. Un año fuera del rango de `YEAR` de MySQL (1901 a 2155) o un texto más largo que la columna devuelve 500 con el mensaje del driver. Falta validar en la ruta.
+2. Los endpoints de la API no exigen autenticación: el login devuelve los datos del usuario, pero no un token, y la sesión vive en `sessionStorage` del navegador.
+3. La ruta 404 sigue respondiendo el HTML de login con estado 200.
+4. `DELETE /api/usuarios/:id` no deja registro en auditoría.
+5. El servicio gratuito de Render se suspende tras un periodo de inactividad y la primera petición posterior tarda más en responder.
+
+## Resultado de las pruebas de esta fase
+
+| Suite | Pruebas | Resultado |
+|-------|---------|-----------|
+| Backend, unitarias (`npm run test:unit`) | 37 | 37 correctas |
+| Backend, integración con MySQL (`npm run test:integration`) | 20 | 20 correctas |
+| Frontend, unitarias (`npm test` en `frontend-react/`) | 11 | 11 correctas |
+| Lint (`npm run lint`) | 4 advertencias | 0 errores |
+| Compilación (`npm run build`) | | Correcta |

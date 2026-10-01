@@ -50,7 +50,8 @@ static async crear(nombre, apellidos, cedula, fecha_nac, email, passwordPlano) {
   static async actualizar(idUsuario, { nombre, apellidos, fecha_nac, email }) {
     const [result] = await pool.execute(
       'UPDATE usuario SET nombre = ?, apellidos = ?, fecha_nac = ?, email = ? WHERE id_usuario = ?',
-      [nombre, apellidos, fecha_nac, email, idUsuario]
+      // Los campos opcionales ausentes se guardan como NULL: mysql2 rechaza valores undefined
+      [nombre, apellidos ?? null, fecha_nac ?? null, email, idUsuario]
     );
     return result.affectedRows > 0;
   }

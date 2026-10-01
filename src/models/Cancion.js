@@ -7,7 +7,8 @@ class Cancion {
   static async crear(titulo, artista, genero, anio) {
     const [result] = await pool.execute(
       'INSERT INTO cancion (titulo, artista, genero, anio) VALUES (?, ?, ?, ?)',
-      [titulo, artista, genero, anio]
+      // genero y anio son opcionales: si no llegan se guardan como NULL (mysql2 rechaza undefined)
+      [titulo, artista, genero ?? null, anio ?? null]
     );
     return result.insertId;
   }

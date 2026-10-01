@@ -31,7 +31,9 @@ router.post('/', async (req, res) => {
 // DELETE /api/canciones/:id
 router.delete('/:id', async (req, res) => {
   try {
-    await CancionController.eliminar(req.params.id, 1);
+    // El usuario que ejecuta la baja se envía en el cuerpo o en la consulta; por compatibilidad, 1 si no llega
+    const idUsuario = Number(req.body?.idUsuario ?? req.query.idUsuario) || 1;
+    await CancionController.eliminar(req.params.id, idUsuario);
     res.json({ mensaje: 'Canción eliminada correctamente.' });
   } catch (err) {
     res.status(500).json({ mensaje: err.message });

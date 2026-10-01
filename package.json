@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon src/server.js",
-    "consola": "node index.js"
+    "api": "node src/server.js",
+    "consola": "node index.js",
+    "test:unit": "node --test \"test/unit/*.test.js\"",
+    "test:integration": "node --env-file=.env.test --test \"test/integration/*.test.js\"",
+    "test": "npm run test:unit && npm run test:integration"
   },
   "author": "Jeinner Antony Valencia Ortiz",
   "license": "MIT",
@@ -19,5 +23,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.x.x"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
